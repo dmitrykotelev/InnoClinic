@@ -21,6 +21,20 @@ const Authorization = ({ apiBaseUrl }) => {
             return clearSessionState();
         }
 
+        const cachedUserInfo = localStorage.getItem('app_user_info');
+        if (cachedUserInfo) {
+            try {
+                const parsedInfo = JSON.parse(cachedUserInfo);
+                console.log("User info loaded from cache");
+                setCurrentUser(parsedInfo);
+                setIsLoggedIn(true);
+                return;
+            } catch (e) {
+                console.warn("Failed to parse cached user info, will fetch from server");
+                localStorage.removeItem('app_user_info');
+            }
+        }
+
         try {
             const response = await fetch(`${apiBaseUrl}/connect/userinfo`, {
                 headers: {
@@ -31,6 +45,9 @@ const Authorization = ({ apiBaseUrl }) => {
             if (response.ok) {
                 const userInfo = await response.json();
                 console.log("User info received from server:", userInfo);
+
+                localStorage.setItem('app_user_info', JSON.stringify(userInfo));
+
                 setCurrentUser(userInfo);
                 setIsLoggedIn(true);
             } else {
@@ -45,6 +62,7 @@ const Authorization = ({ apiBaseUrl }) => {
 
     const clearSessionState = () => {
         localStorage.removeItem('app_token');
+        localStorage.removeItem('app_user_info');
         setIsLoggedIn(false);
         setCurrentUser(null);
     };
