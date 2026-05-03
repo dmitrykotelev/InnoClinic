@@ -1,4 +1,6 @@
 using Duende.IdentityServer.Models;
+using IdentityServer.Helpers;
+using IdentityServer.Settings;
 using IdentityServerDatabase;
 using IdentityServerDatabase.Models;
 using Microsoft.AspNetCore.Identity;
@@ -24,49 +26,7 @@ namespace IdentityServer
             public static IEnumerable<ApiScope> ApiScopes =>
                 new ApiScope[]
                 {
-                    new ApiScope("api_scope", "My API")
-                };
-
-            public static IEnumerable<Client> Clients =>
-                new Client[]
-                {
-                    new Client
-                    {
-                        ClientId = "swagger_client",
-                        ClientName = "Swagger UI",
-                        ClientSecrets = new List<Secret> {new Secret("swagger_client") },
-                        AllowedGrantTypes = GrantTypes.Code,
-                        RequireClientSecret = false,
-                        RequirePkce = true,
-                        RedirectUris = {"http://localhost:5225"},
-                        AllowedCorsOrigins = { "https://localhost:7196", "http://localhost:5225" },
-                        AllowedScopes = { "openid", "profile", "api_scope" }
-                    },
-                    new Client
-                    {
-                        ClientId = "react_client",
-                        ClientName = "React Application",
-            
-                        AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
-            
-                        RequirePkce = true,
-
-                        RequireClientSecret = false,
-                        AllowOfflineAccess = true,
-                        AllowedCorsOrigins = { "https://localhost:7196", "http://localhost:5173" },
-                        AllowedScopes = { "openid", "profile", "api_scope", "email" },
-                        AlwaysIncludeUserClaimsInIdToken = true,
-
-                        Claims = new List<ClientClaim>{new ClientClaim("test","test1")},
-
-                        RedirectUris =
-                        {
-                            "http://localhost:5173/popup-callback",
-                            "http://localhost:5173/callback" 
-                        },
-            
-                        PostLogoutRedirectUris = { "http://localhost:5173/" }
-                    }
+                    new ApiScope(ScopesConfig.ApiScope, "My API")
                 };
         }
 
@@ -86,14 +46,18 @@ namespace IdentityServer
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddRazorPages();
 
+
+            var corsSettings = builder.Configuration.GetSection("CorsSettings").Get<CorsSettings>();
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowReactApp", policy =>
                 {
-                    policy.WithOrigins("http://localhost:5173")
-                          .AllowAnyHeader()
-                          .AllowAnyMethod()
-                          .AllowCredentials();
+                    if (corsSettings?.AllowedOrigins != null && corsSettings.AllowedOrigins.Length > 0)
+                    {
+                        policy.WithOrigins(corsSettings.AllowedOrigins)
+                              .AllowAnyHeader()
+                              .AllowAnyMethod();
+                    }
                 });
             });
 
@@ -147,20 +111,29 @@ namespace IdentityServer
 
                 app.UseSwagger();
 
-                app.UseSwaggerUI(options =>
+                if (app.Environment.IsDevelopment())
                 {
-                    options.OAuthClientId("swagger_client");
-                    options.OAuthUsePkce();
-                });
+                    app.UseSwaggerUI(options =>
+                    {
+                        options.OAuthClientId("swagger_client");
+                        options.OAuthUsePkce();
+                    });
 
-                app.MapGet("/", () => Results.Redirect("/swagger"));
+                    app.MapGet("/", () => Results.Redirect("/swagger"));
+                }
             }
         }
 
         private static void SetIdentityServerSettings(WebApplicationBuilder builder)
         {
+            var clientConfig = builder.Configuration
+                .GetSection("IdentityConfiguration")
+                .Get<ClientsConfig>();
+            var clients = IdentityConfigHelper.GetClients(clientConfig ?? new ClientsConfig());
+
+
             builder.Services.AddDbContext<IdentityDbConnection>(options =>
-               options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
             {
@@ -187,7 +160,7 @@ namespace IdentityServer
             })
             .AddInMemoryIdentityResources(Config.IdentityResources)
             .AddInMemoryApiScopes(Config.ApiScopes)
-            .AddInMemoryClients(Config.Clients)
+            .AddInMemoryClients(clients)
             .AddAspNetIdentity<AppUser>()
             .AddProfileService<ProfileService>();
 
@@ -214,9 +187,9 @@ namespace IdentityServer
                             TokenUrl = new Uri("/connect/token", UriKind.Relative),
                             Scopes = new Dictionary<string, string>
                             {
-                                { "openid", "OpenID" },
-                                { "profile", "Профиль" },
-                                { "api_scope", "Доступ к API" }
+                                { ScopesConfig.OpenId, "OpenID" },
+                                { ScopesConfig.Profile, "Профиль" },
+                                { ScopesConfig.ApiScope, "Доступ к API" }
                             }
                         }
                     }

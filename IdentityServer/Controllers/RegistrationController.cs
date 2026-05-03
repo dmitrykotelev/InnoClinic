@@ -1,9 +1,11 @@
-﻿using IdentityServerDatabase.Models;
-using MailKit.Net.Smtp;
-using MailKit.Security;
+﻿using IdentityServer.Helpers;
+using IdentityServerDatabase.Models;
+using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using MimeKit;
+using System.ComponentModel.DataAnnotations;
+using IdentityServer.Settings;
 
 namespace IdentityServer.Controllers
 {
@@ -16,14 +18,19 @@ namespace IdentityServer.Controllers
 
         public class RegisterModel
         {
+            [Required]
+            [EmailAddress]
             public string Email { get; set; }
+            [Required]
             public string Password { get; set; }
         }
 
         public RegistrationController(UserManager<AppUser> userManager, IConfiguration configuration)
         {
-            _userManager = userManager;
-            _configuration = configuration;
+            if (userManager != null)
+                _userManager = userManager;
+            if (configuration != null)
+                _configuration = configuration;
         }
 
         [HttpPost("reg")]
@@ -67,19 +74,10 @@ namespace IdentityServer.Controllers
 
         private async Task SendGmailAsync(string targetEmail, string message)
         {
-            var email = new MimeMessage();
-            string sender = _configuration["EmailSettings:SenderEmail"] ?? "a@gmail.com";
-            email.From.Add(new MailboxAddress("service", sender));
-            email.To.Add(new MailboxAddress("", targetEmail));
-            email.Subject = "Confirmation";
-            email.Body = new TextPart("html") { Text = message };
+            var emailSettings = _configuration.GetSection("EmailSettings").Get<EmailSettings>()
+                                ?? new EmailSettings();
 
-            using var smtp = new SmtpClient();
-
-            await smtp.ConnectAsync("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
-            await smtp.AuthenticateAsync(_configuration["EmailSettings:SenderEmail"], _configuration["EmailSettings:Password"]);
-            await smtp.SendAsync(email);
-            await smtp.DisconnectAsync(true);
+            await EmailHelper.SendGmailAsync(emailSettings, targetEmail, message);
         }
     }
 }
