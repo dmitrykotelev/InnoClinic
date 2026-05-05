@@ -1,9 +1,8 @@
-﻿using BaseModules.DatabaseClasses.DatabaseInterfaces;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace ProfileDatabase.Models
+namespace Middleware.Mapper.ProfileDto
 {
-    public class Doctor : IDataModel
+    public class DoctorDto : IDto
     {
         public int Id { get; set; }
         [Required]
@@ -18,7 +17,7 @@ namespace ProfileDatabase.Models
         public int AccountId { get; set; }
         public int SpecializationId { get; set; }
         public int OfficeId { get; set; }
-        public DateTime CareerStartYear {  get; set; }
+        public DateTime CareerStartYear { get; set; }
         public bool Status { get; set; }
     }
 }
