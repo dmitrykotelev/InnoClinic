@@ -1,0 +1,141 @@
+/* --- Глобальный контейнер модуля сервисов --- */
+.services-module {
+    max-width: 1152px;
+    margin: 0 auto;
+    padding: 24px;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* --- Панель вкладок (Tabs) --- */
+.tabs-bar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #f3f4f6;
+    overflow-x: auto; /* Для скролла на мобильных устройствах */
+}
+
+.tab-btn {
+    padding: 10px 20px;
+    background-color: transparent;
+    color: #6b7280;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.tab-btn:hover:not(:disabled) {
+    background-color: #f3f4f6;
+    color: #374151;
+}
+
+.tab-btn.active {
+    background-color: #eff6ff;
+    color: #1d4ed8;
+    font-weight: bold;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.tab-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* --- Контейнер для содержимого вкладок --- */
+.services-content-wrapper {
+    background-color: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    min-height: 300px; /* Чтобы контент не прыгал при переключении */
+}
+
+/* --- Группы услуг (Специализации) --- */
+.service-group {
+    margin-bottom: 32px;
+}
+
+.service-group:last-child {
+    margin-bottom: 0;
+}
+
+.service-group h3 {
+    color: #0056b3;
+    font-size: 18px;
+    font-weight: bold;
+    margin: 0 0 16px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+/* --- Списки услуг --- */
+.tab-content ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+}
+
+/* На экранах побольше делаем 2 колонки */
+@media (min-width: 768px) {
+    .tab-content ul {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.tab-content li {
+    padding: 16px;
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    color: #111827;
+    font-size: 15px;
+    font-weight: 500;
+    transition: box-shadow 0.2s, border-color 0.2s;
+    display: flex;
+    align-items: center;
+}
+
+.tab-content li:hover {
+    border-color: #d1d5db;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    background-color: white;
+}
+
+/* --- Состояния загрузки и ошибок --- */
+.status-message {
+    text-align: center;
+    padding: 80px 0;
+    font-size: 18px;
+    color: #6b7280;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.status-message.error {
+    color: #dc2626; /* Красный цвет для ошибки */
+    background-color: #fef2f2;
+    border-radius: 12px;
+    padding: 40px 20px;
+}
+
+/* --- Пустое состояние (Переиспользование логики из Doctors) --- */
+.empty-state {
+    text-align: center;
+    padding: 80px 0;
+    color: #9ca3af;
+    font-size: 18px;
+    background-color: #f9fafb;
+    border-radius: 12px;
+    border: 2px dashed #e5e7eb;
+}
