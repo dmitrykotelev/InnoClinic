@@ -1,30 +1,52 @@
 import React, { useState } from 'react';
 import Authorization from "./components/Authorization/Authorization.jsx";
 import { DoctorsModule } from "./components/Views/Doctors/DoctorsModel.jsx";
-import { EntryView } from "./components/Views/Doctors/EntryView";
+import { ServicesModule } from "./components/Views/Services/ServicesModule.jsx";
+import { EntryView } from "./components/Views/EntryView.jsx";
 import './styles/Doctors.css';
 
 const API_BASE_URL = 'http://localhost:5225';
 
 function App() {
-    const [showDoctors, setShowDoctors] = useState(false);
+    const [currentView, setCurrentView] = useState('main');
+
     const authComponent = <Authorization apiBaseUrl={API_BASE_URL} />;
 
     return (
         <div className="app-container">
-            {showDoctors ? (
+            {currentView === 'doctors' && (
                 <DoctorsModule
-                    onBack={() => setShowDoctors(false)}
+                    onBack={() => setCurrentView('main')}
                     authComponent={authComponent}
                 />
-            ) : (
+            )}
+            {currentView === 'services' && (
+                <ServicesModule
+                    onBack={() => setCurrentView('main')}
+                    authComponent={authComponent}
+                />
+            )}
+
+            {currentView === 'main' && (
                 <>
                     <div className="auth-wrapper">
                         {authComponent}
                     </div>
-                    <EntryView onEnter={() => setShowDoctors(true)} />
+                    <div className="menu-container">
+                        <EntryView
+                            onEnter={() => setCurrentView('doctors')}
+                            icon="👨‍⚕️"
+                            label="Doctors"
+                        />
+                        <EntryView
+                            onEnter={() => setCurrentView('services')}
+                            icon="📋"
+                            label="Services"
+                        />
+                    </div>
                 </>
             )}
+        </div>
     );
 }
 
