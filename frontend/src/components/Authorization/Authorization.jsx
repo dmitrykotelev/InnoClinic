@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import AuthModal from './AuthModal';
+import AuthModal from './AuthModal.jsx';
 
 const Authorization = ({ apiBaseUrl }) => {
     const [isAuthOpen, setIsAuthOpen] = useState(false);

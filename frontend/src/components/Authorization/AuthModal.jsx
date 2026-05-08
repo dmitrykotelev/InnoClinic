@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import SignInForm from './SignInForm';
-import SignUpForm from './SignUpForm';
-import '../styles/SignIn.css';
+import SignInForm from './SignInForm.jsx';
+import SignUpForm from './SignUpForm.jsx';
+import '../../styles/SignIn.css';
 
 const AuthModal = ({ isOpen, onClose, onLoginSuccess, apiBaseUrl }) => {
     const [currentView, setCurrentView] = useState('signIn');

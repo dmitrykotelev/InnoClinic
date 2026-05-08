@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import InputField from './InputField';
-import '../styles/SignIn.css';
+import InputField from './InputField.jsx';
+import '../../styles/SignIn.css';
 
 const api = {
     signIn: async (email, password, apiBaseUrl) => {

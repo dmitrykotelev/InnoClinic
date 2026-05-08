@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import '../styles/SignIn.css';
+import '../../styles/SignIn.css';
 
 const InputField = ({
                         label, type, name, placeholder, value, onChange, onBlur, error, isPassword
