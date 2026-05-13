@@ -6,8 +6,8 @@ namespace BaseModules.DatabaseClasses
 {
     abstract public class Repository<T> where T : class, IDataModel
     {
-        private readonly DbContext _context;
-        private readonly DbSet<T> _dbSet;
+        protected readonly DbContext _context;
+        protected readonly DbSet<T> _dbSet;
 
         protected Repository(DbContext context)
         {

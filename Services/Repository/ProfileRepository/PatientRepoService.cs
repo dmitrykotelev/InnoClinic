@@ -2,6 +2,7 @@
 using ProfileDatabase.Models;
 using ProfileDatabase.Repository;
 using Middleware.Mapper.ProfileDto;
+using Azure;
 
 namespace Middleware.Repository.ProfileRepository
 {
@@ -12,15 +13,9 @@ namespace Middleware.Repository.ProfileRepository
         {
             _patientRepo = repo;
         }
-        public List<PatientDto> GetAllByName(string name)
+        public PatientDto MatchPatient(PatientDto patientDto)
         {
-            var response = _mapper.Map<List<PatientDto>>(_patientRepo.GetAllByName(name));
-
-            return response;
-        }
-        public List<PatientDto> GetAllBySecondName(string secondName)
-        {
-            var response = _mapper.Map<List<PatientDto>>(_patientRepo.GetAllBySecondName(secondName));
+            var response =  _mapper.Map<PatientDto>(_patientRepo.MatchPatient(_mapper.Map<Patient>(patientDto)).GetAwaiter().GetResult());
 
             return response;
         }

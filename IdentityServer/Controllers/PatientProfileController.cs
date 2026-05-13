@@ -17,11 +17,11 @@ namespace IdentityServer.Controllers
             _logger = logger ?? throw new ArgumentException(nameof(logger));
         }
         [HttpPost("UpdatePhoto")]
-        public async Task<IActionResult> SetPhoto(string id, Guid photoId)
+        public async Task<IActionResult> SetPhotoId(string userId, Guid photoId)
         {
-            using (_logger.BeginScope("User Photo Update: {id}", id))
+            using (_logger.BeginScope("User Photo Update: {id}", userId))
             { 
-                var user = await _userManager.FindByIdAsync(id);
+                var user = await _userManager.FindByIdAsync(userId);
 
                 if (user != null)
                 {

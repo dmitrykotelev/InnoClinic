@@ -19,7 +19,7 @@ namespace IdentityServer.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly IConfiguration _configuration;
         private readonly ILogger<RegistrationController> _logger; 
-        private readonly IdentityServerTools _tools;
+        private readonly IdentityServerTools _identityTokenTools;
         public class RegisterModel
         {
             [Required]
@@ -34,7 +34,7 @@ namespace IdentityServer.Controllers
             _userManager = userManager ?? throw new ArgumentException(nameof(userManager));
             _configuration = configuration ?? throw new ArgumentException(nameof(configuration));
             _logger = logger ?? throw new ArgumentException(nameof(logger));
-            _tools = tools ?? throw new ArgumentException(nameof(tools));
+            _identityTokenTools = tools ?? throw new ArgumentException(nameof(tools));
         }
 
         [HttpPost("reg")]
@@ -57,8 +57,9 @@ namespace IdentityServer.Controllers
                     var confirmationLink = Url.Action(nameof(ConfirmEmail), "Registration", values, protocol: Request.Scheme);
 
                     _logger.LogInformation($"Created profile creation link for {user.Id} {user.Email}");
+# if DEBUG
                     await _userManager.AddClaimAsync(user, new Claim("create_profile_link", confirmationLink));
-
+#endif
                     await SendGmailAsync(model.Email, confirmationLink);
 
 
@@ -101,7 +102,7 @@ namespace IdentityServer.Controllers
                         new Claim(JwtClaimTypes.Scope, "profile")
                     };
 
-                    var accessToken = await _tools.IssueJwtAsync(lifetime: 3600, claims: claims);
+                    var accessToken = await _identityTokenTools.IssueJwtAsync(lifetime: 3600, claims: claims);
 
                     var baseUrl = _configuration["FrontendUrls:CreateProfile"];
                     var reactUrl = $"{baseUrl}?token={accessToken}";

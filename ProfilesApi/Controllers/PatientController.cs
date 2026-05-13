@@ -1,6 +1,8 @@
-﻿using BaseApi.Controllers;
+﻿using Azure.Core;
+using BaseApi.Controllers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Client;
 using Middleware.Mapper.ProfileDto;
 using Middleware.Repository.ProfileRepository;
@@ -13,14 +15,6 @@ namespace ProfilesApi.Controllers
     [Route("Profile/Patient")]
     public class PatientController : BaseController<Patient,PatientDto>
     {
-        public class PatientMatch
-        {
-            public string FirstName { get; set; }
-            public string LastName { get; set; }
-            public string? MiddleName { get; set; }
-            public DateTime DateOfBirth { get; set; }
-        }
-
         private readonly PatientRepoService _patientRepoService;
         public PatientController(PatientRepoService repo, PatientValidator validator, ILogger<PatientController> logger) : base(repo, validator, logger)
         {
@@ -29,55 +23,16 @@ namespace ProfilesApi.Controllers
 
 
         [HttpPost("FindAccount")]
-        public async Task<IActionResult> FindAccount([FromBody]PatientMatch patientMatch)
+        public async Task<IActionResult> FindAccount([FromBody]PatientDto patientMatch)
         {
             using (_logger.BeginScope("User to find account: {FirstName}", patientMatch.FirstName))
             {
+                var response = _patientRepoService.MatchPatient(patientMatch);
 
-                var responseByName = _patientRepoService.GetAllByName(patientMatch.FirstName);
-                var responseByLastName = _patientRepoService.GetAllBySecondName(patientMatch.LastName);
+                if (response == null)
+                    return NotFound();
 
-                int count = 0;
-
-                foreach (var patient in responseByName)
-                {
-                    if (patient.FirstName == patientMatch.FirstName)
-                        count += 5;
-                    if (patient.LastName == patientMatch.LastName)
-                        count += 5;
-                    if (patient.MiddleName == patientMatch.MiddleName)
-                        count += 5;
-                    if (patient.DateOfBirth == patientMatch.DateOfBirth)
-                        count += 3;
-
-                    if (count >= 13)
-                    {
-                        _logger.LogInformation($"User founded{patient.Id}");
-                        return Ok(patient);
-                    }
-                    else count = 0;
-                }
-
-                foreach (var patient in responseByLastName)
-                {
-                    if (patient.FirstName == patientMatch.FirstName)
-                        count += 5;
-                    if (patient.LastName == patientMatch.LastName)
-                        count += 5;
-                    if (patient.MiddleName == patientMatch.MiddleName)
-                        count += 5;
-                    if (patient.DateOfBirth == patientMatch.DateOfBirth)
-                        count += 3;
-
-                    if (count >= 13)
-                    {
-                        _logger.LogInformation($"User founded{patient.Id}");
-                        return Ok(patient);
-                    }
-                    else count = 0;
-                }
-
-                return NotFound();
+                return Ok(response);
             }
         }
 
@@ -101,8 +56,8 @@ namespace ProfilesApi.Controllers
             return Ok();
         }
 
-        [HttpGet("CheckProfileExists")]
-        public IActionResult CheckProfileExists([FromQuery] string accountId)
+        [HttpGet("GetByAccId/{id}")]
+        public IActionResult GetByAccId(string accountId)
         {
             using (_logger.BeginScope("Checking profile existence for AccountId: {AccountId}", accountId))
             {
