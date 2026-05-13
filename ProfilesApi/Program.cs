@@ -63,16 +63,19 @@ namespace ProfilesApi
         private static void AddRepos(WebApplicationBuilder builder)
         {
             builder.Services.AddTransient<DoctorRepo>();
+            builder.Services.AddTransient<PatientRepo>();
         }
 
         private static void AddValidators(WebApplicationBuilder builder)
         {
             builder.Services.AddTransient<DoctorValidator>();
+            builder.Services.AddTransient<PatientValidator>();
         }
 
         private static void AddRepoServices(WebApplicationBuilder builder)
         {
             builder.Services.AddTransient<DoctorRepoService>();
+            builder.Services.AddTransient<PatientRepoService>();
         }
     }
 }

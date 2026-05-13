@@ -9,6 +9,7 @@ namespace ProfileDatabase.Core
             : base(options) { }
 
         public DbSet<Doctor> Doctors { get; set; }
+        public DbSet<Patient> Patients { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -56,6 +57,46 @@ namespace ProfileDatabase.Core
                     OfficeId = 1,
                     CareerStartYear = new DateTime(2020, 9, 1, 0, 0, 0, DateTimeKind.Utc),
                     Status = false  
+                }
+            ); 
+            modelBuilder.Entity<Patient>().HasData(
+                new Patient
+                {
+                    Id = 1,
+                    FirstName = "Elizabeth",
+                    LastName = "Sam",
+                    MiddleName = "Elizabeth",
+                    IsLinkedToAccount = true,
+                    DateOfBirth = new DateTime(1985, 5, 15),
+                },
+                new Patient
+                {
+                    Id = 2,
+                    FirstName = "Linda",
+                    LastName = "Albert",
+                    MiddleName = "Van",
+                    IsLinkedToAccount = false,
+                    DateOfBirth = new DateTime(1992, 8, 22),
+                    AccountId = null
+                },
+                new Patient
+                {
+                    Id = 3,
+                    FirstName = "John",
+                    LastName = "Doe",
+                    MiddleName = null,
+                    IsLinkedToAccount = false,
+                    DateOfBirth = new DateTime(1978, 11, 3),
+                },
+                new Patient
+                {
+                    Id = 4,
+                    FirstName = "Joe",
+                    LastName = "Bull",
+                    MiddleName = "Billy",
+                    IsLinkedToAccount = false,
+                    DateOfBirth = new DateTime(2000, 1, 10),
+                    AccountId = null
                 }
             );
         }

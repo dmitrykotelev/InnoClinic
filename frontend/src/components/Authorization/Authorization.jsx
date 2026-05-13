@@ -1,86 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import AuthModal from './AuthModal.jsx';
 
-const Authorization = ({ apiBaseUrl }) => {
+const Authorization = ({ apiBaseUrl, isLoggedIn, currentUser, onLoginSuccess, onLogout }) => {
     const [isAuthOpen, setIsAuthOpen] = useState(false);
 
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [currentUser, setCurrentUser] = useState(null);
-
-    useEffect(() => {
-        checkSession();
-    }, []);
-
-    const checkSession = async () => {
-        const token = localStorage.getItem('app_token');
-        console.log("Authorization checking session. Token found:", !!token);
-
-        const isInvalid = !token || token === "undefined" || token === "null";
-
-        if (isInvalid) {
-            return clearSessionState();
-        }
-
-        const cachedUserInfo = localStorage.getItem('app_user_info');
-        if (cachedUserInfo) {
-            try {
-                const parsedInfo = JSON.parse(cachedUserInfo);
-                console.log("User info loaded from cache");
-                setCurrentUser(parsedInfo);
-                setIsLoggedIn(true);
-                return;
-            } catch (e) {
-                console.warn("Failed to parse cached user info, will fetch from server");
-                localStorage.removeItem('app_user_info');
-            }
-        }
-
-        try {
-            const response = await fetch(`${apiBaseUrl}/connect/userinfo`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (response.ok) {
-                const userInfo = await response.json();
-                console.log("User info received from server:", userInfo);
-
-                localStorage.setItem('app_user_info', JSON.stringify(userInfo));
-
-                setCurrentUser(userInfo);
-                setIsLoggedIn(true);
-            } else {
-                console.error("Invalid or expired token, server returned:", response.status);
-                clearSessionState();
-            }
-        } catch (error) {
-            console.error("Network error while fetching user info:", error);
-            clearSessionState();
-        }
-    };
-
-    const clearSessionState = () => {
-        localStorage.removeItem('app_token');
-        localStorage.removeItem('app_user_info');
-        setIsLoggedIn(false);
-        setCurrentUser(null);
-    };
-
-    const handleLoginSuccess = (token) => {
-        console.log("Authorization received token:", token);
-
-        if (token && token !== "undefined") {
-            localStorage.setItem('app_token', token);
-            checkSession();
-            setIsAuthOpen(false);
-        } else {
-            console.error("Token is missing or undefined!");
-        }
+    const handleSuccess = (token) => {
+        setIsAuthOpen(false);
+        onLoginSuccess(token);
     };
 
     const handleLogout = () => {
-        clearSessionState();
+        onLogout();
         console.log("Local logout successful");
     };
 
@@ -104,7 +34,7 @@ const Authorization = ({ apiBaseUrl }) => {
             <AuthModal
                 isOpen={isAuthOpen}
                 onClose={() => setIsAuthOpen(false)}
-                onLoginSuccess={handleLoginSuccess}
+                onLoginSuccess={handleSuccess}
                 apiBaseUrl={apiBaseUrl}
             />
 
