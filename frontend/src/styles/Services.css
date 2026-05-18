@@ -1,3 +1,170 @@
+/* --- Profile Creation --- */
+.profile-creation-container {
+    max-width: 500px;
+    margin: 40px auto;
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    font-family: Arial, sans-serif;
+}
+
+.profile-creation-container h2 {
+    text-align: center;
+    color: #000000; /* Black */
+    margin-bottom: 24px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    margin-bottom: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333333; /* Dark Gray */
+}
+
+.form-group input {
+    padding: 10px;
+    border: 1px solid #cccccc; /* Gray */
+    border-radius: 4px;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.2s;
+    color: #000000;
+}
+
+.form-group input:focus {
+    border-color: #E30613; /* Red */
+}
+
+/* Красная рамка при ошибке */
+.form-group input.input-error {
+    border-color: #E30613; /* Red */
+}
+
+.error-text {
+    color: #E30613; /* Red */
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.confirm-btn {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    background-color: #E30613; /* Red */
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.confirm-btn:disabled {
+    background-color: #cccccc; /* Gray */
+    color: #666666;
+    cursor: not-allowed;
+}
+
+.confirm-btn:hover:not(:disabled) {
+    background-color: #B30000; /* Darker Red */
+}
+
+/* Модальное окно */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 8px;
+    width: 350px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    text-align: center;
+}
+
+.modal-close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666666; /* Gray */
+    transition: color 0.2s ease;
+}
+
+.modal-close-btn:hover {
+    color: #000000; /* Black */
+}
+
+.modal-title {
+    margin-top: 0;
+    text-align: center;
+    margin-bottom: 20px;
+    color: #000000;
+}
+
+.matched-profile-info {
+    background: #f5f5f5; /* Light Gray */
+    padding: 15px;
+    border-radius: 6px;
+    margin: 15px 0;
+    text-align: left;
+    color: #333333;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.btn-yes, .btn-no {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-yes {
+    background-color: #E30613; /* Red for primary action */
+    color: #ffffff;
+}
+
+.btn-no {
+    background-color: #666666; /* Gray for secondary action */
+    color: #ffffff;
+}
+
+.btn-yes:hover { background-color: #B30000; }
+.btn-no:hover { background-color: #333333; }
+
 /* --- Глобальный контейнер модуля сервисов --- */
 .services-module {
     max-width: 1152px;
@@ -13,13 +180,13 @@
     margin-bottom: 24px;
     padding-bottom: 16px;
     border-bottom: 2px solid #f3f4f6;
-    overflow-x: auto; /* Для скролла на мобильных устройствах */
+    overflow-x: auto;
 }
 
 .tab-btn {
     padding: 10px 20px;
     background-color: transparent;
-    color: #6b7280;
+    color: #666666; /* Gray */
     border: none;
     border-radius: 8px;
     font-size: 16px;
@@ -30,13 +197,13 @@
 }
 
 .tab-btn:hover:not(:disabled) {
-    background-color: #f3f4f6;
-    color: #374151;
+    background-color: #f5f5f5; /* Light Gray */
+    color: #000000; /* Black */
 }
 
 .tab-btn.active {
-    background-color: #eff6ff;
-    color: #1d4ed8;
+    background-color: #f5f5f5; /* Light Gray */
+    color: #E30613; /* Red */
     font-weight: bold;
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
@@ -48,12 +215,12 @@
 
 /* --- Контейнер для содержимого вкладок --- */
 .services-content-wrapper {
-    background-color: white;
+    background-color: #ffffff;
     border: 1px solid #e5e7eb;
     border-radius: 16px;
     padding: 24px;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-    min-height: 300px; /* Чтобы контент не прыгал при переключении */
+    min-height: 300px;
 }
 
 /* --- Группы услуг (Специализации) --- */
@@ -66,7 +233,7 @@
 }
 
 .service-group h3 {
-    color: #0056b3;
+    color: #000000; /* Black */
     font-size: 18px;
     font-weight: bold;
     margin: 0 0 16px 0;
@@ -84,7 +251,6 @@
     gap: 16px;
 }
 
-/* На экранах побольше делаем 2 колонки */
 @media (min-width: 768px) {
     .tab-content ul {
         grid-template-columns: repeat(2, 1fr);
@@ -93,10 +259,10 @@
 
 .tab-content li {
     padding: 16px;
-    background-color: #f9fafb;
+    background-color: #f5f5f5; /* Light Gray */
     border: 1px solid #e5e7eb;
     border-radius: 8px;
-    color: #111827;
+    color: #000000; /* Black */
     font-size: 15px;
     font-weight: 500;
     transition: box-shadow 0.2s, border-color 0.2s;
@@ -105,9 +271,9 @@
 }
 
 .tab-content li:hover {
-    border-color: #d1d5db;
+    border-color: #cccccc;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-    background-color: white;
+    background-color: #ffffff;
 }
 
 /* --- Состояния загрузки и ошибок --- */
@@ -115,7 +281,7 @@
     text-align: center;
     padding: 80px 0;
     font-size: 18px;
-    color: #6b7280;
+    color: #666666;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -123,19 +289,9 @@
 }
 
 .status-message.error {
-    color: #dc2626; /* Красный цвет для ошибки */
-    background-color: #fef2f2;
+    color: #E30613; /* Red */
+    background-color: #fcf0f0; /* Very Light Red */
     border-radius: 12px;
     padding: 40px 20px;
-}
-
-/* --- Пустое состояние (Переиспользование логики из Doctors) --- */
-.empty-state {
-    text-align: center;
-    padding: 80px 0;
-    color: #9ca3af;
-    font-size: 18px;
-    background-color: #f9fafb;
-    border-radius: 12px;
-    border: 2px dashed #e5e7eb;
+    border: 1px solid #facdcd;
 }

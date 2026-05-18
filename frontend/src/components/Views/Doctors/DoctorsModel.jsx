@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { fetchDoctors } from './api';
 import { DoctorsView } from './DoctorsView';
 
-export const DoctorsModule = ({ onBack, authComponent }) => {
+export const DoctorsModule = ({ onBack }) => {
     const [doctors, setDoctors] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedSpec, setSelectedSpec] = useState('');
@@ -45,7 +45,6 @@ export const DoctorsModule = ({ onBack, authComponent }) => {
             onSpecChange={setSelectedSpec}
             onOfficeChange={setSelectedOffice}
             onBack={onBack}
-            authComponent={authComponent}
         />
     );
 };

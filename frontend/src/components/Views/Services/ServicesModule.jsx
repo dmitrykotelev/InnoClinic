@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Header } from '../Header';
 import '../../../styles/Services.css';
 
-export const ServicesModule = ({ onBack, authComponent, apiBaseUrl }) => {
+export const ServicesModule = ({ onBack, apiBaseUrl }) => {
     const [activeTab, setActiveTab] = useState('consultations');
 
     const [allServices, setAllServices] = useState([]);
@@ -141,7 +141,7 @@ export const ServicesModule = ({ onBack, authComponent, apiBaseUrl }) => {
 
     return (
         <div className="services-module">
-            <Header onBack={onBack} authComponent={authComponent} title="Clinic Services" />
+            <Header onBack={onBack} title="Clinic Services" />
 
             <div className="tabs-bar">
                 <button
@@ -170,7 +170,6 @@ export const ServicesModule = ({ onBack, authComponent, apiBaseUrl }) => {
             </div>
 
             <div className="services-content-wrapper">
-                {renderContent()}
             </div>
         </div>
     );

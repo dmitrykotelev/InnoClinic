@@ -11,6 +11,7 @@ namespace Middleware.Mapper
         public MapperProfile()
         {
             CreateMap<Doctor, DoctorDto>().ReverseMap();
+            CreateMap<Patient, PatientDto>().ReverseMap();
         }
     }
 }

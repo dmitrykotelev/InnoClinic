@@ -9,7 +9,7 @@ const api = {
         params.append('client_id', 'react_client');
         params.append('username', email);
         params.append('password', password);
-        params.append('scope', 'openid profile api_scope offline_access');
+        params.append('scope', 'openid profile api_scope offline_access custom_profile');
 
         const response = await fetch(`${apiBaseUrl}/connect/token`, {
             method: 'POST',

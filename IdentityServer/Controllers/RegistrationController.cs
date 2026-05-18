@@ -1,9 +1,14 @@
-﻿using IdentityServer.Helpers;
+﻿using Duende.IdentityModel;
+using Duende.IdentityServer;
+using IdentityServer.Helpers;
+using IdentityServer.Settings;
 using IdentityServerDatabase.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 using System.ComponentModel.DataAnnotations;
-using IdentityServer.Settings;
+using System.Security.Claims;
+using System.Text;
 
 namespace IdentityServer.Controllers
 {
@@ -13,7 +18,8 @@ namespace IdentityServer.Controllers
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly IConfiguration _configuration;
-        private readonly ILogger<RegistrationController> _logger;
+        private readonly ILogger<RegistrationController> _logger; 
+        private readonly IdentityServerTools _identityTokenTools;
         public class RegisterModel
         {
             [Required]
@@ -23,11 +29,12 @@ namespace IdentityServer.Controllers
             public string Password { get; set; }
         }
 
-        public RegistrationController(UserManager<AppUser> userManager, IConfiguration configuration, ILogger<RegistrationController> logger)
+        public RegistrationController(UserManager<AppUser> userManager, IConfiguration configuration, ILogger<RegistrationController> logger, IdentityServerTools tools)
         {
             _userManager = userManager ?? throw new ArgumentException(nameof(userManager));
             _configuration = configuration ?? throw new ArgumentException(nameof(configuration));
             _logger = logger ?? throw new ArgumentException(nameof(logger));
+            _identityTokenTools = tools ?? throw new ArgumentException(nameof(tools));
         }
 
         [HttpPost("reg")]
@@ -43,11 +50,20 @@ namespace IdentityServer.Controllers
                 {
                     _logger.LogInformation($"Registration Succeed, Email - {user.Email}");
                     var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+                    
 
-                    var values = new { userId = user.Id, code = token };
+                    var values = new { userId = user.Id, code = encodedToken };
                     var confirmationLink = Url.Action(nameof(ConfirmEmail), "Registration", values, protocol: Request.Scheme);
 
+                    _logger.LogInformation($"Created profile creation link for {user.Id} {user.Email}");
+# if DEBUG
+                    Console.WriteLine("Debug version");
+                    await _userManager.AddClaimAsync(user, new Claim("create_profile_link", confirmationLink));
+#endif
                     await SendGmailAsync(model.Email, confirmationLink);
+
+
 
                     return Ok(new { Message = "User Registrated" });
                 }
@@ -58,29 +74,45 @@ namespace IdentityServer.Controllers
         }
 
         [HttpGet("ConfirmEmail")]
-        public async Task<IActionResult> ConfirmEmail(string userId, string code)
+        public async Task<IActionResult> ConfirmEmail([FromQuery] string? userId, [FromQuery] string? code)
         {
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(code))
+                return BadRequest();
+
             using (_logger.BeginScope("UserEmail: {UserEmail}", userId))
             {
                 _logger.LogInformation($"Confirm email started: {userId}");
 
                 var user = await _userManager.FindByIdAsync(userId);
                 if (user == null)
-                {
                     return NotFound();
-                }
 
-                _logger.LogInformation($"User Founded, sending mail on adress{user.Email}");
-                var result = await _userManager.ConfirmEmailAsync(user, code);
+                var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
+                var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
 
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation($"Mail Sended on adress {user.Email}");
-                    return Ok(new { Message = "Email confirmed successfully" });
+                    var claims = new List<Claim>
+                    {
+                        new Claim(JwtClaimTypes.Subject, user.Id.ToString()),
+                        new Claim(JwtClaimTypes.Email, user.Email),
+                        new Claim(JwtClaimTypes.Name, user.UserName),
+
+                        new Claim(JwtClaimTypes.ClientId, "react_client"), 
+                        new Claim(JwtClaimTypes.Scope, "openid"),
+                        new Claim(JwtClaimTypes.Scope, "profile")
+                    };
+
+                    var accessToken = await _identityTokenTools.IssueJwtAsync(lifetime: 3600, claims: claims);
+
+                    var baseUrl = _configuration["FrontendUrls:CreateProfile"];
+                    var reactUrl = $"{baseUrl}?token={accessToken}";
+
+                    return Redirect(reactUrl);
                 }
 
-                _logger.LogWarning($"Failed to send email on adress {user.Email} {result.Errors}");
-                return BadRequest("Failed to confirm email.");
+                var errorUrl = _configuration["FrontendUrls:Error"];
+                return Redirect($"{errorUrl}?message=EmailConfirmationFailed");
             }
         }
 

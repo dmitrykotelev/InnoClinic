@@ -6,7 +6,6 @@ using IdentityServerDatabase.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
-using System.Security.Claims;
 
 namespace IdentityServer
 {
@@ -21,6 +20,10 @@ namespace IdentityServer
                     new IdentityResources.Profile(),
                     new IdentityResources.Email(),
                     new IdentityResources.Phone(),
+                    new IdentityResource(
+                        name: "custom_profile",
+                        userClaims: new[] { "create_profile_link" }
+                        )
                 };
 
             public static IEnumerable<ApiScope> ApiScopes =>
@@ -45,7 +48,9 @@ namespace IdentityServer
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddRazorPages();
+            builder.Services.AddHttpContextAccessor();
 
+            builder.Services.AddTransient<Duende.IdentityServer.IdentityServerTools>();
 
             var corsSettings = builder.Configuration.GetSection("CorsSettings").Get<CorsSettings>();
             builder.Services.AddCors(options =>

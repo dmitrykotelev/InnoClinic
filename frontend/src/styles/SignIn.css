@@ -1,52 +1,3 @@
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.6);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-.modal-content {
-    background: white;
-    padding: 30px;
-    border-radius: 8px;
-    width: 350px;
-    /* Добавляем максимальную высоту и скролл,
-       так как в регистрации больше полей (3 инпута + ошибки) */
-    max-height: 90vh;
-    overflow-y: auto;
-    position: relative;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-}
-
-.modal-close-btn {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-    color: #666;
-    transition: color 0.2s ease;
-}
-
-.modal-close-btn:hover {
-    color: #000;
-}
-
-.modal-title {
-    margin-top: 0;
-    text-align: center;
-    margin-bottom: 20px;
-    color: #333;
-}
-
 /* =========================================
    СТИЛИ ФОРМЫ И УВЕДОМЛЕНИЙ
    ========================================= */
@@ -63,22 +14,22 @@
     font-size: 14px;
 }
 
+/* Нет зеленого в палитре Innowise, используем нейтральный серый/черный для Success */
 .global-message.success {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
+    background-color: #f5f5f5; /* Light Gray */
+    color: #000000; /* Black */
+    border: 1px solid #cccccc;
 }
 
 .global-message.error {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
+    background-color: #fcf0f0; /* Light Red */
+    color: #E30613; /* Red */
+    border: 1px solid #facdcd;
 }
 
 /* =========================================
    ПОЛЯ ВВОДА (Inputs)
    ========================================= */
-
 .input-group {
     display: flex;
     flex-direction: column;
@@ -88,7 +39,7 @@
 .input-label {
     margin-bottom: 5px;
     font-size: 14px;
-    color: #555;
+    color: #333333; /* Dark Gray */
     font-weight: 500;
 }
 
@@ -100,28 +51,29 @@
     width: 100%;
     padding: 10px;
     border-radius: 6px;
-    border: 1px solid #ccc;
+    border: 1px solid #cccccc; /* Gray */
     font-size: 16px;
     outline: none;
     box-sizing: border-box;
-    transition: border-color 0.2s ease;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    color: #ffffff;
 }
 
 .input-field:focus {
-    border-color: #80bdff;
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    border-color: #E30613; /* Red */
+    box-shadow: 0 0 0 0.2rem rgba(227, 6, 19, 0.25);
 }
 
 .input-field.has-error {
-    border-color: #dc3545;
+    border-color: #E30613; /* Red */
 }
 
 .input-field.has-error:focus {
-    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    box-shadow: 0 0 0 0.2rem rgba(227, 6, 19, 0.25);
 }
 
 .input-field.is-password {
-    padding-right: 40px; /* Место под иконку "глазика" */
+    padding-right: 40px;
 }
 
 .eye-btn {
@@ -137,21 +89,19 @@
     align-items: center;
     justify-content: center;
     height: 20px;
-    color: #666;
+    color: #666666; /* Gray */
 }
 
-.error-text {
-    color: #dc3545;
-    font-size: 12px;
-    margin-top: 5px;
+.eye-btn:hover {
+    color: #000000; /* Black */
 }
 
 .submit-btn {
     width: 100%;
     padding: 12px;
     margin-top: 10px;
-    background-color: #007bff;
-    color: white;
+    background-color: #E30613; /* Red */
+    color: #ffffff;
     border: none;
     border-radius: 6px;
     font-size: 16px;
@@ -161,11 +111,12 @@
 }
 
 .submit-btn:hover:not(:disabled) {
-    background-color: #0056b3;
+    background-color: #B30000; /* Darker Red */
 }
 
 .submit-btn:disabled {
-    background-color: #a0c4ff;
+    background-color: #cccccc; /* Gray */
+    color: #666666;
     cursor: not-allowed;
 }
 
@@ -173,11 +124,11 @@
     margin-top: 15px;
     text-align: center;
     font-size: 14px;
-    color: #666;
+    color: #666666;
 }
 
 .signup-link {
-    color: #007bff;
+    color: #E30613; /* Red */
     cursor: pointer;
     text-decoration: none;
     font-weight: bold;
@@ -185,12 +136,7 @@
 
 .signup-link:hover {
     text-decoration: underline;
-}
-
-.app-container {
-    padding: 40px;
-    font-family: Arial, sans-serif;
-    color: #333;
+    color: #B30000;
 }
 
 .buttons-row {
@@ -202,21 +148,22 @@
 .trigger-btn {
     padding: 10px 20px;
     cursor: pointer;
-    background-color: #6c757d;
-    color: white;
+    background-color: #333333; /* Dark Gray / Black variant */
+    color: #ffffff;
     border: none;
     border-radius: 4px;
     font-size: 16px;
+    transition: background-color 0.2s;
 }
 
 .trigger-btn:hover {
-    background-color: #5a6268;
+    background-color: #000000; /* Black */
 }
 
 .trigger-btn.success {
-    background-color: #28a745;
+    background-color: #E30613; /* Red */
 }
 
 .trigger-btn.success:hover {
-    background-color: #218838;
+    background-color: #B30000; /* Darker Red */
 }

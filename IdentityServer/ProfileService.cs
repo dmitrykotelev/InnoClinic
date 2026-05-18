@@ -31,8 +31,13 @@ namespace IdentityServer
                 else
                     customClaims.Add(new Claim("PhotoId", "PhotoId"));
 
+                var claims = await _userManager.GetClaimsAsync(user);
+                var linkClaim = claims.FirstOrDefault(c => c.Type == "create_profile_link");
 
-                if(user.PhoneNumber  != null)
+                if(linkClaim != null)
+                    customClaims.Add(linkClaim);
+
+                if (user.PhoneNumber  != null)
                     customClaims.Add(new Claim("PhoneNumber", user.PhoneNumber));
 
                 context.IssuedClaims.AddRange(customClaims);
