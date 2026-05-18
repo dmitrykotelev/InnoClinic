@@ -55,18 +55,22 @@ namespace ProfilesApi.Controllers
 
             return Ok();
         }
-
-        [HttpGet("GetByAccId/{id}")]
+        [HttpGet("GetByAccId/{accountId}")]
         public IActionResult GetByAccId(string accountId)
         {
+            if (string.IsNullOrWhiteSpace(accountId))
+            {
+                return BadRequest("AccountId is required.");
+            }
+
             using (_logger.BeginScope("Checking profile existence for AccountId: {AccountId}", accountId))
             {
                 var response = _patientRepoService.GetByAccountId(accountId);
 
                 if (response != null)
                 {
-                    _logger.LogInformation($"Profile found for AccountId: {accountId}. Returning true.");
-                    return Ok();
+                    _logger.LogInformation($"Profile found for AccountId: {accountId}.");
+                    return Ok(response);
                 }
 
                 _logger.LogInformation($"No profile found for AccountId: {accountId}. Returning false.");

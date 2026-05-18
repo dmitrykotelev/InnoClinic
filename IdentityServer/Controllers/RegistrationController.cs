@@ -58,6 +58,7 @@ namespace IdentityServer.Controllers
 
                     _logger.LogInformation($"Created profile creation link for {user.Id} {user.Email}");
 # if DEBUG
+                    Console.WriteLine("Debug version");
                     await _userManager.AddClaimAsync(user, new Claim("create_profile_link", confirmationLink));
 #endif
                     await SendGmailAsync(model.Email, confirmationLink);
