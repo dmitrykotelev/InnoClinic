@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import Authorization from "./components/Authorization/Authorization.jsx";
 import { DoctorsModule } from "./components/Views/Doctors/DoctorsModel.jsx";
 import { ServicesModule } from "./components/Views/Services/ServicesModule.jsx";
 import { EntryView } from "./components/Views/EntryView.jsx";
 import { PatientProfileCreation } from "./components/Profile/PatientProfileCreations.jsx";
+import { PatientProfile } from './components/Profile/PatientProfile.jsx';
 import './styles/Doctors.css';
 import './styles/App.css';
 
 const API_BASE_URL = 'http://localhost:5225';
 
 const MainApp = () => {
+    const navigate = useNavigate();
     const [currentView, setCurrentView] = useState('main');
     
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -93,7 +95,14 @@ const MainApp = () => {
 
             <div className="top-right-panel">
                 <button className="btn-action">➕ Appointment</button>
-                <button className="btn-action">👤 Profile</button>
+                {isLoggedIn && (
+                    <button 
+                        className="btn-action" 
+                        onClick={() => navigate('/profile')} 
+                    >
+                        👤 Profile
+                    </button>
+                )}
                 <div className="auth-wrapper">
                     {authComponent}
                 </div>
@@ -125,6 +134,7 @@ function App() {
             <Routes>
                 <Route path="/" element={<MainApp />} />
                 <Route path="/create-profile" element={<PatientProfileCreation />} />
+                <Route path="/profile" element={<PatientProfile />} />
             </Routes>
         </BrowserRouter>
     );
