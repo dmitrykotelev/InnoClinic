@@ -3,6 +3,10 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import '../../styles/ProfileCreation.css';
 
 const PATIENT_API_URL = 'http://localhost:5297/Profile/Patient'; 
+const DOCUMENTS_API_URL = 'https://localhost:7250/Photo'; 
+const IDENTITY_API_URL = 'http://localhost:5225/Profile'; 
+
+const DUENDE_AUTHORITY_URL = 'http://localhost:5225'; 
 
 const parseJwt = (token) => {
     try {
@@ -21,7 +25,6 @@ export const PatientProfileCreation = () => {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     
-    // Теперь userId хранится в состоянии, а не берется напрямую из URL
     const [userId, setUserId] = useState(null);
     const [isLoadingAuth, setIsLoadingAuth] = useState(true);
 
@@ -34,6 +37,7 @@ export const PatientProfileCreation = () => {
         dateOfBirth: '',
     });
 
+    const [photoPreview, setPhotoPreview] = useState(null);
     const [errors, setErrors] = useState({});
     const [touched, setTouched] = useState({});
     const [showMatchModal, setShowMatchModal] = useState(false);
@@ -47,7 +51,6 @@ export const PatientProfileCreation = () => {
             const token = tokenFromUrl || tokenFromStorage;
 
             if (!token) {
-                console.warn("Unauthorized access. Redirecting to home...");
                 navigate('/');
                 return;
             }
@@ -56,7 +59,6 @@ export const PatientProfileCreation = () => {
             const extractedUserId = decodedToken?.sub || decodedToken?.nameid || decodedToken?.Id;
 
             if (!extractedUserId) {
-                console.error("Invalid token structure. Redirecting to home...");
                 localStorage.removeItem('accessToken');
                 navigate('/');
                 return;
@@ -68,7 +70,7 @@ export const PatientProfileCreation = () => {
             }
 
             try {
-                const response = await fetch(`${PATIENT_API_URL}/CheckProfileExists?accountId=${encodeURIComponent(extractedUserId)}`, {
+                const response = await fetch(`${PATIENT_API_URL}/GetByAccId?accountId=${encodeURIComponent(extractedUserId)}`, {
                     headers: {
                         'Accept': 'application/json',
                         'Authorization': `Bearer ${token}`
@@ -76,23 +78,25 @@ export const PatientProfileCreation = () => {
                 });
 
                 if (response.ok) {
-                        console.log("Profile already exists for this account. Redirecting to home...");
-                        alert("У вас уже есть профиль!");
                         navigate('/');
                         return;
                 }
             } catch (error) {
                 console.error("Failed to check existing profile:", error);
-
             }
 
             setUserId(extractedUserId);
             setIsLoadingAuth(false);
-            console.log(`User authorized. Extracted ID: ${extractedUserId}`);
         };
 
         checkAuthAndProfile();
     }, [navigate, searchParams]);
+
+    useEffect(() => {
+        return () => {
+            if (photoPreview) URL.revokeObjectURL(photoPreview);
+        };
+    }, [photoPreview]);
 
     const validateField = (name, value) => {
         let error = '';
@@ -109,17 +113,47 @@ export const PatientProfileCreation = () => {
         return error;
     };
 
+    const validateFile = (file) => {
+        if (!file) return '';
+        const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+        if (!validTypes.includes(file.type)) {
+            return 'Invalid format. Allowed: JPG, PNG, WEBP, PDF';
+        }
+        if (file.size > 5 * 1024 * 1024) { 
+            return 'File is too large (max 5MB)';
+        }
+        return '';
+    };
+
     const handleChange = (e) => {
         const { name, value, type, files } = e.target;
+        
         if (type === 'file') {
-            setFormData(prev => ({ ...prev, [name]: files[0] }));
+            const file = files[0];
+            if (!file) {
+                setFormData(prev => ({ ...prev, photo: null }));
+                setPhotoPreview(null);
+                return;
+            }
+            const fileError = validateFile(file);
+            if (fileError) {
+                setErrors(prev => ({ ...prev, photo: fileError }));
+                setFormData(prev => ({ ...prev, photo: null }));
+                setPhotoPreview(null);
+            } else {
+                setErrors(prev => ({ ...prev, photo: '' }));
+                setFormData(prev => ({ ...prev, photo: file }));
+                setPhotoPreview(URL.createObjectURL(file));
+            }
             return;
         }
+
         let newValue = value;
         if (name === 'phoneNumber') {
             if (!newValue.startsWith('+')) { newValue = '+' + newValue.replace(/\D/g, ''); } 
             else { newValue = '+' + newValue.slice(1).replace(/\D/g, ''); }
         }
+        
         setFormData(prev => ({ ...prev, [name]: newValue }));
         if (touched[name]) { setErrors(prev => ({ ...prev, [name]: validateField(name, newValue) })); }
     };
@@ -135,6 +169,98 @@ export const PatientProfileCreation = () => {
         const hasEmptyFields = requiredFields.some(field => field === 'phoneNumber' ? formData[field] === '+' : !formData[field]);
         const hasErrors = Object.values(errors).some(err => err !== '');
         return !hasEmptyFields && !hasErrors;
+    };
+
+    const refreshAuthToken = async () => {
+        try {
+            const refreshToken = localStorage.getItem('refreshToken');
+            
+            if (!refreshToken) {
+                console.warn("Отсутствует refresh_token. Невозможно обновить сессию.");
+                return;
+            }
+
+            const tokenEndpoint = `${DUENDE_AUTHORITY_URL}/connect/token`;
+
+            const params = new URLSearchParams();
+            params.append('grant_type', 'refresh_token');
+            params.append('refresh_token', refreshToken);
+            
+            params.append('client_id', 'react_client'); 
+
+            const response = await fetch(tokenEndpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: params
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                
+                if (data.access_token) localStorage.setItem('accessToken', data.access_token);
+                if (data.refresh_token) localStorage.setItem('refreshToken', data.refresh_token);
+                
+                console.log("Токен успешно обновлен через Duende!");
+            } else {
+                const errorData = await response.json();
+                console.warn("Не удалось обновить токен в Duende:", errorData);
+            }
+        } catch (error) {
+            console.error("Ошибка при обращении к Duende:", error);
+        }
+    };
+
+    const handlePhotoUpload = async () => {
+        if (!formData.photo) return true; 
+
+        const token = localStorage.getItem('accessToken');
+        const uploadData = new FormData();
+        uploadData.append('file', formData.photo);
+
+        try {
+            const uploadRes = await fetch(`${DOCUMENTS_API_URL}/UploadPhoto?AccountId=${encodeURIComponent(userId)}`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` },
+                body: uploadData 
+            });
+
+            if (!uploadRes.ok) throw new Error('Failed to upload photo to MinIO');
+            const photoId = await uploadRes.json();
+
+            const setPhotoRes = await fetch(`${IDENTITY_API_URL}/UpdatePhoto?userId=${encodeURIComponent(userId)}&photoId=${encodeURIComponent(photoId)}`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!setPhotoRes.ok) throw new Error('Failed to link photo to user account');
+            return true;
+        } catch (error) {
+            console.error("Photo upload error:", error);
+            alert("Произошла ошибка при загрузке фотографии.");
+            return false;
+        }
+    };
+
+    const handlePhoneUpdate = async () => {
+        const token = localStorage.getItem('accessToken');
+        try {
+            const response = await fetch(`${IDENTITY_API_URL}/UpdatePhoneNumber?userId=${encodeURIComponent(userId)}&phoneNumber=${encodeURIComponent(formData.phoneNumber)}`, {
+                method: 'POST', 
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!response.ok) throw new Error("Failed to update phone number in Identity");
+            return true;
+        } catch (error) {
+            console.error("Phone update error:", error);
+            alert("Произошла ошибка при сохранении номера телефона.");
+            return false;
+        }
     };
 
     const checkMatches = async (data) => {
@@ -169,6 +295,19 @@ export const PatientProfileCreation = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
+
+        const photoUploaded = await handlePhotoUpload();
+        if (!photoUploaded) {
+            setIsSubmitting(false);
+            return; 
+        }
+
+        const phoneUpdated = await handlePhoneUpdate();
+        if (!phoneUpdated) {
+            setIsSubmitting(false);
+            return; 
+        }
+
         const match = await checkMatches(formData);
         if (match) {
             setMatchedProfile(match);
@@ -194,7 +333,9 @@ export const PatientProfileCreation = () => {
             if (response.ok) {
                 setShowMatchModal(false);
                 alert('Profile linked successfully!');
-                navigate('/');
+                
+                await refreshAuthToken(); 
+                window.location.href = '/';
             } else {
                 alert('Failed to link profile. Please try again.');
             }
@@ -212,9 +353,11 @@ export const PatientProfileCreation = () => {
     const createProfile = async () => {
         try {
             const submitData = {
-                firstName: formData.firstName, lastName: formData.lastName, 
-                middleName: formData.middleName, phoneNumber: formData.phoneNumber,
-                dateOfBirth: formData.dateOfBirth, IsLinkedToAccount: true,
+                firstName: formData.firstName, 
+                lastName: formData.lastName, 
+                middleName: formData.middleName, 
+                dateOfBirth: formData.dateOfBirth, 
+                IsLinkedToAccount: true,
                 accountId: userId 
             };
 
@@ -230,10 +373,10 @@ export const PatientProfileCreation = () => {
 
             if (response.ok) {
                 alert('Profile created successfully!');
+                
+                await refreshAuthToken(); 
                 navigate('/');
             } else {
-                const errorData = await response.json().catch(() => null);
-                console.error("Server validation errors:", errorData);
                 alert(`Failed to create profile. Check console for details.`);
             }
         } catch (error) {
@@ -257,9 +400,39 @@ export const PatientProfileCreation = () => {
             )}
             
             <form onSubmit={handleSubmit} className="profile-form">
+                
                 <div className="form-group">
                     <label>Photo</label>
-                    <input type="file" name="photo" onChange={handleChange} accept="image/*" />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginTop: '10px' }}>
+                        
+                        <div style={{
+                            width: '80px', height: '80px', borderRadius: '50%', 
+                            border: '2px solid #ccc', overflow: 'hidden', 
+                            display: 'flex', justifyContent: 'center', alignItems: 'center',
+                            backgroundColor: '#f5f5f5', flexShrink: 0
+                        }}>
+                            {photoPreview ? (
+                                formData.photo?.type === 'application/pdf' ? (
+                                    <span style={{ fontSize: '14px', fontWeight: 'bold', color: '#666' }}>PDF</span>
+                                ) : (
+                                    <img src={photoPreview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                )
+                            ) : (
+                                <span style={{ fontSize: '12px', color: '#999' }}>No Photo</span>
+                            )}
+                        </div>
+
+                        <div style={{ flexGrow: 1 }}>
+                            <input 
+                                type="file" 
+                                name="photo" 
+                                onChange={handleChange} 
+                                accept="image/jpeg, image/png, image/webp, application/pdf" 
+                                style={{ width: '100%' }}
+                            />
+                            {errors.photo && <span className="error-text" style={{ color: 'red', display: 'block', marginTop: '5px' }}>{errors.photo}</span>}
+                        </div>
+                    </div>
                 </div>
 
                 <div className="form-group">
@@ -329,7 +502,7 @@ export const PatientProfileCreation = () => {
                     className="confirm-btn" 
                     disabled={!isFormValid() || isSubmitting}
                 >
-                    Confirm
+                    {isSubmitting ? 'Processing...' : 'Confirm'}
                 </button>
             </form>
 

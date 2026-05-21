@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import '../../styles/PatientProfile.css';
 
 const API_BASE_URL = 'http://localhost:5297/Profile/Patient';
+const DOCUMENTS_API_URL = 'https://localhost:7250/Photo'; 
+const IDENTITY_API_URL = 'http://localhost:5225/Profile'; 
 
 const parseJwt = (token) => {
     try {
@@ -38,37 +40,77 @@ export const PatientProfile = () => {
             const token = localStorage.getItem('accessToken');
 
             if (!token) {
-                console.error("No token found");
                 navigate('/');
                 return;
             }
+            
             const decoded = parseJwt(token);
-            const accountId = decoded?.sub || decoded?.nameid;
+            const accountId = decoded?.sub;
 
             if (!accountId) {
-                console.error("Invalid token: accountId not found");
-                setError("Ошибка авторизации. Войдите снова.");
                 setIsLoading(false);
                 return;
             }
 
             try {
-                const response = await fetch(`${API_BASE_URL}/GetByAccId/${encodeURIComponent(accountId)}`, {
-                    headers: {
-                        'Accept': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    }
+                const profileResponse = await fetch(`${API_BASE_URL}/GetByAccId?accountId=${encodeURIComponent(accountId)}`, {
+                    headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` }
                 });
 
-                if (response.ok) {
-                    const data = await response.json();
+                if (profileResponse.ok) {
+                    const data = await profileResponse.json();
+
+                    try {
+                        const phoneRes = await fetch(`${IDENTITY_API_URL}/GetPhoneNumber?userId=${encodeURIComponent(accountId)}`, {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        if (phoneRes.ok) {
+                            const rawPhone = await phoneRes.text();
+                            data.phoneNumber = rawPhone.replace(/^"|"$/g, ''); 
+                        }
+                    } catch (phoneErr) {
+                        console.error(phoneErr);
+                        data.phoneNumber = '+'; 
+                    }
+
+                    let fetchedPhotoId = null;
+                    try {
+                        const photoIdResponse = await fetch(`${IDENTITY_API_URL}/GetPhotoId?userId=${encodeURIComponent(accountId)}`, {
+                            headers: { 
+                                'Accept': 'application/json',
+                                'Authorization': `Bearer ${token}` 
+                            }
+                        });
+                        
+                        if (photoIdResponse.ok) {
+                            const rawPhotoId = await photoIdResponse.text();
+                            fetchedPhotoId = rawPhotoId.replace(/^"|"$/g, ''); 
+                            console.log(fetchedPhotoId);
+                        }
+                    } catch (photoIdErr) {
+                        console.error(photoIdErr);
+                    }
+
+                    if (fetchedPhotoId && fetchedPhotoId !== "0" && fetchedPhotoId !== "null") {
+                        try {
+                            const photoRes = await fetch(`${DOCUMENTS_API_URL}/GetPhoto/${encodeURIComponent(fetchedPhotoId)}`, {
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            if (photoRes.ok) {
+                                const rawUrl = await photoRes.text();
+                                data.photoUrl = rawUrl.replace(/^"|"$/g, ''); 
+                            }
+                        } catch (pErr) {
+                            console.error(pErr);
+                        }
+                    } else {
+                        data.photoUrl = null;
+                    }
+
                     setProfileData(data);
-                } else {
-                    setError("Profile not found.");
                 }
             } catch (err) {
                 console.error("Fetch error:", err);
-                setError();
             } finally {
                 setIsLoading(false);
             }
@@ -81,7 +123,8 @@ export const PatientProfile = () => {
         setFormData({
             ...profileData,
             dateOfBirth: profileData.dateOfBirth ? profileData.dateOfBirth.split('T')[0] : '',
-            phoneNumber: profileData.phoneNumber || '+'
+            phoneNumber: profileData.phoneNumber || '+',
+            photo: null 
         });
         setErrors({});
         setTouched({});
@@ -91,74 +134,55 @@ export const PatientProfile = () => {
     const validateField = (name, value) => {
         let errMsg = '';
         switch (name) {
-            case 'firstName':
-                if (!value.trim()) errMsg = 'Please, enter the first name';
-                break;
-            case 'lastName':
-                if (!value.trim()) errMsg = 'Please, enter the last name';
-                break;
+            case 'firstName': if (!value.trim()) errMsg = 'Please, enter the first name'; break;
+            case 'lastName': if (!value.trim()) errMsg = 'Please, enter the last name'; break;
             case 'phoneNumber':
-                if (!value || value === '+') {
-                    errMsg = 'Please, enter the phone number';
-                } else if (!/^\+[0-9]+$/.test(value)) {
-                    errMsg = "You've entered an invalid phone number";
-                }
+                if (!value || value === '+') { errMsg = 'Please, enter the phone number'; } 
+                else if (!/^\+[0-9]+$/.test(value)) { errMsg = "You've entered an invalid phone number"; }
                 break;
             case 'dateOfBirth':
-                if (!value) {
-                    errMsg = 'Please, select the date';
-                } else if (value > todayStr) {
-                    errMsg = 'Date cannot be in the future'; 
-                }
+                if (!value) { errMsg = 'Please, select the date'; } 
+                else if (value > todayStr) { errMsg = 'Date cannot be in the future'; }
                 break;
-            default:
-                break;
+            default: break;
         }
         return errMsg;
     };
 
     const handleChange = (e) => {
-        const { name, value, type } = e.target;
+        const { name, value, type, files } = e.target;
         
         if (type === 'file') {
+            const file = files[0];
+            if (!file) {
+                setFormData(prev => ({ ...prev, photo: null }));
+                return;
+            }
+            setFormData(prev => ({ ...prev, photo: file }));
             return;
         }
 
         let newValue = value;
-
         if (name === 'phoneNumber') {
-            if (!newValue.startsWith('+')) {
-                newValue = '+' + newValue.replace(/\D/g, '');
-            } else {
-                newValue = '+' + newValue.slice(1).replace(/\D/g, '');
-            }
+            if (!newValue.startsWith('+')) { newValue = '+' + newValue.replace(/\D/g, ''); } 
+            else { newValue = '+' + newValue.slice(1).replace(/\D/g, ''); }
         }
 
         setFormData(prev => ({ ...prev, [name]: newValue }));
-
-        if (touched[name]) {
-            setErrors(prev => ({ ...prev, [name]: validateField(name, newValue) }));
-        }
+        if (touched[name]) { setErrors(prev => ({ ...prev, [name]: validateField(name, newValue) })); }
     };
 
     const handleBlur = (e) => {
         const { name, value, type } = e.target;
         if (type === 'file') return;
-
         setTouched(prev => ({ ...prev, [name]: true }));
         setErrors(prev => ({ ...prev, [name]: validateField(name, value) }));
     };
 
     const isFormValid = () => {
         const requiredFields = ['firstName', 'lastName', 'phoneNumber', 'dateOfBirth'];
-        
-        const hasEmptyFields = requiredFields.some(field => {
-            if (field === 'phoneNumber') return !formData[field] || formData[field] === '+';
-            return !formData[field];
-        });
-
+        const hasEmptyFields = requiredFields.some(field => field === 'phoneNumber' ? formData[field] === '+' : !formData[field]);
         const hasErrors = Object.values(errors).some(err => err !== '');
-
         return !hasEmptyFields && !hasErrors;
     };
 
@@ -167,8 +191,52 @@ export const PatientProfile = () => {
 
         setIsSaving(true);
         const token = localStorage.getItem('accessToken');
+        const decoded = parseJwt(token);
+        const accountId = decoded?.sub || decoded?.nameid;
+
+        let uploadedPhotoId = null;
+
+        if (formData.photo instanceof File) {
+            try {
+                const uploadData = new FormData();
+                uploadData.append('file', formData.photo);
+
+                const uploadRes = await fetch(`${DOCUMENTS_API_URL}/UploadPhoto?AccountId=${encodeURIComponent(accountId)}`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: uploadData
+                });
+
+                const setPhotoRes = await fetch(`${IDENTITY_API_URL}/UpdatePhoto?userId=${encodeURIComponent(accountId)}&photoId=${encodeURIComponent(uploadedPhotoId)}`, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!setPhotoRes.ok) throw new Error('Failed to link photo to user');
+                
+            } catch (error) {
+                console.error("Photo upload error:", error);
+            }
+        }
 
         try {
+            const phoneRes = await fetch(`${IDENTITY_API_URL}/UpdatePhoneNumber?userId=${encodeURIComponent(accountId)}&phoneNumber=${encodeURIComponent(formData.phoneNumber)}`, {
+                method: 'POST', 
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!phoneRes.ok) throw new Error('Failed to update phone in Identity');
+        } catch (error) {
+            console.error("Phone update error:", error);
+        }
+
+        try {
+            const dataToSubmit = { ...formData };
+            delete dataToSubmit.photo; 
+            delete dataToSubmit.phoneNumber; 
+
             const response = await fetch(`${API_BASE_URL}/Update`, {
                 method: 'POST',
                 headers: {
@@ -176,19 +244,30 @@ export const PatientProfile = () => {
                     'Accept': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify(formData)
+                body: JSON.stringify(dataToSubmit)
             });
 
             if (response.ok) {
-                setProfileData({ ...formData });
+                let newPhotoUrl = profileData.photoUrl;
+
+                if (uploadedPhotoId) {
+                    try {
+                        const photoRes = await fetch(`${DOCUMENTS_API_URL}/GetPhoto/${encodeURIComponent(uploadedPhotoId)}`, {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        if (photoRes.ok) {
+                            const rawUrl = await photoRes.text();
+                            newPhotoUrl = rawUrl.replace(/^"|"$/g, '');
+                        }
+                    } catch (e) { console.error("Failed to fetch new photo URL", e); }
+                }
+
+                setProfileData({ ...dataToSubmit, phoneNumber: formData.phoneNumber, photoUrl: newPhotoUrl });
                 setIsEditing(false);
             } else {
-                console.error("Failed to update profile", await response.text());
-                alert();
             }
         } catch (err) {
             console.error("Update error:", err);
-            alert();
         } finally {
             setIsSaving(false);
         }
@@ -260,7 +339,16 @@ export const PatientProfile = () => {
                             <>
                                 <div className="profile-photo-section">
                                     {profileData.photoUrl ? (
-                                        <img src={profileData.photoUrl} alt="Patient" className="profile-photo-large" />
+                                        <img 
+                                            src={profileData.photoUrl} 
+                                            alt="Patient" 
+                                            className="profile-photo-large" 
+                                            onError={(e) => {
+                                                e.target.onerror = null; 
+                                                e.target.style.display = 'none';
+                                                e.target.parentElement.innerHTML = '<div class="profile-photo-placeholder">Фото недоступно</div>';
+                                            }}
+                                        />
                                     ) : (
                                         <div className="profile-photo-placeholder">Нет фото</div>
                                     )}
@@ -302,9 +390,10 @@ export const PatientProfile = () => {
                                     <input 
                                         type="file" 
                                         name="photo" 
-                                        accept="image/*" 
+                                        accept="image/jpeg, image/png, image/webp, application/pdf" 
                                         onChange={handleChange}
                                     />
+                                    {formData.photo && <span style={{fontSize:'12px', color:'#2e7d32', marginTop:'5px'}}>Файл выбран: {formData.photo.name}</span>}
                                 </div>
 
                                 <div className="form-group">
@@ -377,7 +466,7 @@ export const PatientProfile = () => {
                                         onClick={handleSave} 
                                         disabled={!isFormValid() || isSaving}
                                     >
-                                        Save changes
+                                        {isSaving ? 'Saving...' : 'Save changes'}
                                     </button>
                                     <button 
                                         className="btn-cancel" 

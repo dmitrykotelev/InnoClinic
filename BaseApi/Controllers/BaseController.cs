@@ -88,9 +88,6 @@ namespace BaseApi.Controllers
                 if (data == null)
                     return BadRequest();
 
-                if (_repo.GetById(data.Id) == null)
-                    return NotFound();
-
                 _logger.LogInformation($"Succesfully Update Request with {data.GetType().Name}");
                 return Ok(_repo.Update(data));
             }

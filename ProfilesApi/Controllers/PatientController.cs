@@ -55,8 +55,8 @@ namespace ProfilesApi.Controllers
 
             return Ok();
         }
-        [HttpGet("GetByAccId/{accountId}")]
-        public IActionResult GetByAccId(string accountId)
+        [HttpGet("GetByAccId")]
+        public IActionResult GetByAccId([FromQuery]string accountId)
         {
             if (string.IsNullOrWhiteSpace(accountId))
             {
