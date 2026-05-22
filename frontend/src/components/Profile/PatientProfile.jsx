@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../../styles/PatientProfile.css';
 
-const API_BASE_URL = 'http://localhost:5297/Profile/Patient';
-const DOCUMENTS_API_URL = 'https://localhost:7250/Photo'; 
-const IDENTITY_API_URL = 'http://localhost:5225/Profile'; 
+const API_BASE_URL = 'http://patients.inno-clinic.com';
+const DOCUMENTS_API_URL = 'http://photos.inno-clinic.com'; 
+const IDENTITY_API_URL = 'http://identity.inno-clinic.com'; 
 
 const parseJwt = (token) => {
     try {
@@ -53,7 +53,7 @@ export const PatientProfile = () => {
             }
 
             try {
-                const profileResponse = await fetch(`${API_BASE_URL}/GetByAccId?accountId=${encodeURIComponent(accountId)}`, {
+                const profileResponse = await fetch(`${API_BASE_URL}/Profile/Patient/GetByAccId?accountId=${encodeURIComponent(accountId)}`, {
                     headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` }
                 });
 
@@ -61,7 +61,7 @@ export const PatientProfile = () => {
                     const data = await profileResponse.json();
 
                     try {
-                        const phoneRes = await fetch(`${IDENTITY_API_URL}/GetPhoneNumber?userId=${encodeURIComponent(accountId)}`, {
+                        const phoneRes = await fetch(`${IDENTITY_API_URL}/Profile/GetPhoneNumber?userId=${encodeURIComponent(accountId)}`, {
                             headers: { 'Authorization': `Bearer ${token}` }
                         });
                         if (phoneRes.ok) {
@@ -75,7 +75,7 @@ export const PatientProfile = () => {
 
                     let fetchedPhotoId = null;
                     try {
-                        const photoIdResponse = await fetch(`${IDENTITY_API_URL}/GetPhotoId?userId=${encodeURIComponent(accountId)}`, {
+                        const photoIdResponse = await fetch(`${IDENTITY_API_URL}/Profile/GetPhotoId?userId=${encodeURIComponent(accountId)}`, {
                             headers: { 
                                 'Accept': 'application/json',
                                 'Authorization': `Bearer ${token}` 
@@ -93,7 +93,7 @@ export const PatientProfile = () => {
 
                     if (fetchedPhotoId && fetchedPhotoId !== "0" && fetchedPhotoId !== "null") {
                         try {
-                            const photoRes = await fetch(`${DOCUMENTS_API_URL}/GetPhoto/${encodeURIComponent(fetchedPhotoId)}`, {
+                            const photoRes = await fetch(`${DOCUMENTS_API_URL}/Photo/GetPhoto/${encodeURIComponent(fetchedPhotoId)}`, {
                                 headers: { 'Authorization': `Bearer ${token}` }
                             });
                             if (photoRes.ok) {
@@ -201,13 +201,13 @@ export const PatientProfile = () => {
                 const uploadData = new FormData();
                 uploadData.append('file', formData.photo);
 
-                const uploadRes = await fetch(`${DOCUMENTS_API_URL}/UploadPhoto?AccountId=${encodeURIComponent(accountId)}`, {
+                const uploadRes = await fetch(`${DOCUMENTS_API_URL}/Photo/UploadPhoto?AccountId=${encodeURIComponent(accountId)}`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` },
                     body: uploadData
                 });
 
-                const setPhotoRes = await fetch(`${IDENTITY_API_URL}/UpdatePhoto?userId=${encodeURIComponent(accountId)}&photoId=${encodeURIComponent(uploadedPhotoId)}`, {
+                const setPhotoRes = await fetch(`${IDENTITY_API_URL}/Profile/UpdatePhoto?userId=${encodeURIComponent(accountId)}&photoId=${encodeURIComponent(uploadedPhotoId)}`, {
                     method: 'POST',
                     headers: {
                         'Accept': 'application/json',
@@ -223,7 +223,7 @@ export const PatientProfile = () => {
         }
 
         try {
-            const phoneRes = await fetch(`${IDENTITY_API_URL}/UpdatePhoneNumber?userId=${encodeURIComponent(accountId)}&phoneNumber=${encodeURIComponent(formData.phoneNumber)}`, {
+            const phoneRes = await fetch(`${IDENTITY_API_URL}/Profile/UpdatePhoneNumber?userId=${encodeURIComponent(accountId)}&phoneNumber=${encodeURIComponent(formData.phoneNumber)}`, {
                 method: 'POST', 
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -237,7 +237,7 @@ export const PatientProfile = () => {
             delete dataToSubmit.photo; 
             delete dataToSubmit.phoneNumber; 
 
-            const response = await fetch(`${API_BASE_URL}/Update`, {
+            const response = await fetch(`${API_BASE_URL}/Profile/Patient/Update`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -252,7 +252,7 @@ export const PatientProfile = () => {
 
                 if (uploadedPhotoId) {
                     try {
-                        const photoRes = await fetch(`${DOCUMENTS_API_URL}/GetPhoto/${encodeURIComponent(uploadedPhotoId)}`, {
+                        const photoRes = await fetch(`${DOCUMENTS_API_URL}/Photo/GetPhoto/${encodeURIComponent(uploadedPhotoId)}`, {
                             headers: { 'Authorization': `Bearer ${token}` }
                         });
                         if (photoRes.ok) {

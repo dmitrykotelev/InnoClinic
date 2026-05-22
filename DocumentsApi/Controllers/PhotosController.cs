@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Middleware.Mapper;
-using Middleware.Minio;
 using Middleware.Repository.DocumentsRepository;
+using Middleware.Uploader;
+using Middleware.Uploader.Minio;
 
 namespace DocumentsApi.Controllers
 {
@@ -9,7 +10,7 @@ namespace DocumentsApi.Controllers
     [Route("Photo")]
     public class PhotosController : Controller
     {
-        private MinioService _minioService;
+        private IFileUploadService _minioService;
         private PhotosRepositoryService _photosRepo;
         private ILogger _logger;
         public PhotosController(MinioService minioService, PhotosRepositoryService photosRepo, ILogger<PhotosController> logger)

@@ -30,7 +30,11 @@ namespace BaseModules.DatabaseClasses
             var response = _dbSet.Find(id);
             return response;
         }
-
+        public virtual T GetByGuId(Guid id)
+        {
+            var response = _dbSet.Find(id);
+            return response;
+        }
         public virtual IEnumerable<T> GetAll()
         {
             var response = _dbSet.ToList();
@@ -50,12 +54,12 @@ namespace BaseModules.DatabaseClasses
 
         public virtual T Update(T model)
         {
-            var data = _dbSet.Local.FirstOrDefault(x => x.Id == model.Id);
-            _dbSet.Entry(data).CurrentValues.SetValues(model);
-
+            _context.ChangeTracker.Clear();
+               
+            var response = _dbSet.Update(model);
 
             if (Save())
-                return GetById(data.Id);
+                return (T)response.Entity;
 
             return null;
         }

@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import '../../styles/ProfileCreation.css';
 
-const PATIENT_API_URL = 'http://localhost:5297/Profile/Patient'; 
-const DOCUMENTS_API_URL = 'https://localhost:7250/Photo'; 
-const IDENTITY_API_URL = 'http://localhost:5225/Profile'; 
+const PATIENT_API_URL = 'http://patients.inno-clinic.com/Profile/Patient'; 
+const DOCUMENTS_API_URL = 'http://photos.inno-clinic.com/Photo'; 
+const IDENTITY_API_URL = 'http://identity.inno-clinic.com/Profile'; 
 
-const DUENDE_AUTHORITY_URL = 'http://localhost:5225'; 
+const DUENDE_AUTHORITY_URL = 'http://identity.inno-clinic.com'; 
 
 const parseJwt = (token) => {
     try {
