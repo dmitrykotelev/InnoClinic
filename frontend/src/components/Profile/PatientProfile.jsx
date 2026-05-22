@@ -40,14 +40,16 @@ export const PatientProfile = () => {
             const token = localStorage.getItem('accessToken');
 
             if (!token) {
+                console.error("No token found");
                 navigate('/');
                 return;
             }
-            
             const decoded = parseJwt(token);
-            const accountId = decoded?.sub;
+            const accountId = decoded?.sub || decoded?.nameid;
 
             if (!accountId) {
+                console.error("Invalid token: accountId not found");
+                setError("Ошибка авторизации. Войдите снова.");
                 setIsLoading(false);
                 return;
             }
@@ -108,9 +110,12 @@ export const PatientProfile = () => {
                     }
 
                     setProfileData(data);
+                } else {
+                    setError("Profile not found.");
                 }
             } catch (err) {
                 console.error("Fetch error:", err);
+                setError();
             } finally {
                 setIsLoading(false);
             }
@@ -123,8 +128,7 @@ export const PatientProfile = () => {
         setFormData({
             ...profileData,
             dateOfBirth: profileData.dateOfBirth ? profileData.dateOfBirth.split('T')[0] : '',
-            phoneNumber: profileData.phoneNumber || '+',
-            photo: null 
+            phoneNumber: profileData.phoneNumber || '+'
         });
         setErrors({});
         setTouched({});
@@ -134,55 +138,74 @@ export const PatientProfile = () => {
     const validateField = (name, value) => {
         let errMsg = '';
         switch (name) {
-            case 'firstName': if (!value.trim()) errMsg = 'Please, enter the first name'; break;
-            case 'lastName': if (!value.trim()) errMsg = 'Please, enter the last name'; break;
+            case 'firstName':
+                if (!value.trim()) errMsg = 'Please, enter the first name';
+                break;
+            case 'lastName':
+                if (!value.trim()) errMsg = 'Please, enter the last name';
+                break;
             case 'phoneNumber':
-                if (!value || value === '+') { errMsg = 'Please, enter the phone number'; } 
-                else if (!/^\+[0-9]+$/.test(value)) { errMsg = "You've entered an invalid phone number"; }
+                if (!value || value === '+') {
+                    errMsg = 'Please, enter the phone number';
+                } else if (!/^\+[0-9]+$/.test(value)) {
+                    errMsg = "You've entered an invalid phone number";
+                }
                 break;
             case 'dateOfBirth':
-                if (!value) { errMsg = 'Please, select the date'; } 
-                else if (value > todayStr) { errMsg = 'Date cannot be in the future'; }
+                if (!value) {
+                    errMsg = 'Please, select the date';
+                } else if (value > todayStr) {
+                    errMsg = 'Date cannot be in the future'; 
+                }
                 break;
-            default: break;
+            default:
+                break;
         }
         return errMsg;
     };
 
     const handleChange = (e) => {
-        const { name, value, type, files } = e.target;
+        const { name, value, type } = e.target;
         
         if (type === 'file') {
-            const file = files[0];
-            if (!file) {
-                setFormData(prev => ({ ...prev, photo: null }));
-                return;
-            }
-            setFormData(prev => ({ ...prev, photo: file }));
             return;
         }
 
         let newValue = value;
+
         if (name === 'phoneNumber') {
-            if (!newValue.startsWith('+')) { newValue = '+' + newValue.replace(/\D/g, ''); } 
-            else { newValue = '+' + newValue.slice(1).replace(/\D/g, ''); }
+            if (!newValue.startsWith('+')) {
+                newValue = '+' + newValue.replace(/\D/g, '');
+            } else {
+                newValue = '+' + newValue.slice(1).replace(/\D/g, '');
+            }
         }
 
         setFormData(prev => ({ ...prev, [name]: newValue }));
-        if (touched[name]) { setErrors(prev => ({ ...prev, [name]: validateField(name, newValue) })); }
+
+        if (touched[name]) {
+            setErrors(prev => ({ ...prev, [name]: validateField(name, newValue) }));
+        }
     };
 
     const handleBlur = (e) => {
         const { name, value, type } = e.target;
         if (type === 'file') return;
+
         setTouched(prev => ({ ...prev, [name]: true }));
         setErrors(prev => ({ ...prev, [name]: validateField(name, value) }));
     };
 
     const isFormValid = () => {
         const requiredFields = ['firstName', 'lastName', 'phoneNumber', 'dateOfBirth'];
-        const hasEmptyFields = requiredFields.some(field => field === 'phoneNumber' ? formData[field] === '+' : !formData[field]);
+        
+        const hasEmptyFields = requiredFields.some(field => {
+            if (field === 'phoneNumber') return !formData[field] || formData[field] === '+';
+            return !formData[field];
+        });
+
         const hasErrors = Object.values(errors).some(err => err !== '');
+
         return !hasEmptyFields && !hasErrors;
     };
 
@@ -244,7 +267,7 @@ export const PatientProfile = () => {
                     'Accept': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify(dataToSubmit)
+                body: JSON.stringify(formData)
             });
 
             if (response.ok) {
@@ -265,9 +288,12 @@ export const PatientProfile = () => {
                 setProfileData({ ...dataToSubmit, phoneNumber: formData.phoneNumber, photoUrl: newPhotoUrl });
                 setIsEditing(false);
             } else {
+                console.error("Failed to update profile", await response.text());
+                alert();
             }
         } catch (err) {
             console.error("Update error:", err);
+            alert();
         } finally {
             setIsSaving(false);
         }
@@ -339,16 +365,7 @@ export const PatientProfile = () => {
                             <>
                                 <div className="profile-photo-section">
                                     {profileData.photoUrl ? (
-                                        <img 
-                                            src={profileData.photoUrl} 
-                                            alt="Patient" 
-                                            className="profile-photo-large" 
-                                            onError={(e) => {
-                                                e.target.onerror = null; 
-                                                e.target.style.display = 'none';
-                                                e.target.parentElement.innerHTML = '<div class="profile-photo-placeholder">Фото недоступно</div>';
-                                            }}
-                                        />
+                                        <img src={profileData.photoUrl} alt="Patient" className="profile-photo-large" />
                                     ) : (
                                         <div className="profile-photo-placeholder">Нет фото</div>
                                     )}
@@ -390,10 +407,9 @@ export const PatientProfile = () => {
                                     <input 
                                         type="file" 
                                         name="photo" 
-                                        accept="image/jpeg, image/png, image/webp, application/pdf" 
+                                        accept="image/*" 
                                         onChange={handleChange}
                                     />
-                                    {formData.photo && <span style={{fontSize:'12px', color:'#2e7d32', marginTop:'5px'}}>Файл выбран: {formData.photo.name}</span>}
                                 </div>
 
                                 <div className="form-group">
@@ -466,7 +482,7 @@ export const PatientProfile = () => {
                                         onClick={handleSave} 
                                         disabled={!isFormValid() || isSaving}
                                     >
-                                        {isSaving ? 'Saving...' : 'Save changes'}
+                                        Save changes
                                     </button>
                                     <button 
                                         className="btn-cancel" 
