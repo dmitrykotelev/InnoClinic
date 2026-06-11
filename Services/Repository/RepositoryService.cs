@@ -24,6 +24,13 @@ namespace Middleware.Repository
 
             return _mapper.Map<TT>(_repo.GetById(id));
         }
+        public TT GetByGuId(Guid id)
+        {
+            var data = _repo.GetByGuId(id);
+            TT dto = _mapper.Map<TT>(data);
+
+            return _mapper.Map<TT>(_repo.GetByGuId(id));
+        }
 
         public List<TT> GetAll()
         {

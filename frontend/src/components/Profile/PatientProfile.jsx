@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../../styles/PatientProfile.css';
 
-const API_BASE_URL = 'http://localhost:5297/Profile/Patient';
+const API_BASE_URL = 'http://patients.inno-clinic.com';
+const DOCUMENTS_API_URL = 'http://photos.inno-clinic.com'; 
+const IDENTITY_API_URL = 'http://identity.inno-clinic.com'; 
 
 const parseJwt = (token) => {
     try {
@@ -53,15 +55,60 @@ export const PatientProfile = () => {
             }
 
             try {
-                const response = await fetch(`${API_BASE_URL}/GetByAccId/${encodeURIComponent(accountId)}`, {
-                    headers: {
-                        'Accept': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    }
+                const profileResponse = await fetch(`${API_BASE_URL}/Profile/Patient/GetByAccId?accountId=${encodeURIComponent(accountId)}`, {
+                    headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` }
                 });
 
-                if (response.ok) {
-                    const data = await response.json();
+                if (profileResponse.ok) {
+                    const data = await profileResponse.json();
+
+                    try {
+                        const phoneRes = await fetch(`${IDENTITY_API_URL}/Profile/GetPhoneNumber?userId=${encodeURIComponent(accountId)}`, {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        if (phoneRes.ok) {
+                            const rawPhone = await phoneRes.text();
+                            data.phoneNumber = rawPhone.replace(/^"|"$/g, ''); 
+                        }
+                    } catch (phoneErr) {
+                        console.error(phoneErr);
+                        data.phoneNumber = '+'; 
+                    }
+
+                    let fetchedPhotoId = null;
+                    try {
+                        const photoIdResponse = await fetch(`${IDENTITY_API_URL}/Profile/GetPhotoId?userId=${encodeURIComponent(accountId)}`, {
+                            headers: { 
+                                'Accept': 'application/json',
+                                'Authorization': `Bearer ${token}` 
+                            }
+                        });
+                        
+                        if (photoIdResponse.ok) {
+                            const rawPhotoId = await photoIdResponse.text();
+                            fetchedPhotoId = rawPhotoId.replace(/^"|"$/g, ''); 
+                            console.log(fetchedPhotoId);
+                        }
+                    } catch (photoIdErr) {
+                        console.error(photoIdErr);
+                    }
+
+                    if (fetchedPhotoId && fetchedPhotoId !== "0" && fetchedPhotoId !== "null") {
+                        try {
+                            const photoRes = await fetch(`${DOCUMENTS_API_URL}/Photo/GetPhoto/${encodeURIComponent(fetchedPhotoId)}`, {
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            if (photoRes.ok) {
+                                const rawUrl = await photoRes.text();
+                                data.photoUrl = rawUrl.replace(/^"|"$/g, ''); 
+                            }
+                        } catch (pErr) {
+                            console.error(pErr);
+                        }
+                    } else {
+                        data.photoUrl = null;
+                    }
+
                     setProfileData(data);
                 } else {
                     setError("Profile not found.");
@@ -167,9 +214,53 @@ export const PatientProfile = () => {
 
         setIsSaving(true);
         const token = localStorage.getItem('accessToken');
+        const decoded = parseJwt(token);
+        const accountId = decoded?.sub || decoded?.nameid;
+
+        let uploadedPhotoId = null;
+
+        if (formData.photo instanceof File) {
+            try {
+                const uploadData = new FormData();
+                uploadData.append('file', formData.photo);
+
+                const uploadRes = await fetch(`${DOCUMENTS_API_URL}/Photo/UploadPhoto?AccountId=${encodeURIComponent(accountId)}`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: uploadData
+                });
+
+                const setPhotoRes = await fetch(`${IDENTITY_API_URL}/Profile/UpdatePhoto?userId=${encodeURIComponent(accountId)}&photoId=${encodeURIComponent(uploadedPhotoId)}`, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!setPhotoRes.ok) throw new Error('Failed to link photo to user');
+                
+            } catch (error) {
+                console.error("Photo upload error:", error);
+            }
+        }
 
         try {
-            const response = await fetch(`${API_BASE_URL}/Update`, {
+            const phoneRes = await fetch(`${IDENTITY_API_URL}/Profile/UpdatePhoneNumber?userId=${encodeURIComponent(accountId)}&phoneNumber=${encodeURIComponent(formData.phoneNumber)}`, {
+                method: 'POST', 
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!phoneRes.ok) throw new Error('Failed to update phone in Identity');
+        } catch (error) {
+            console.error("Phone update error:", error);
+        }
+
+        try {
+            const dataToSubmit = { ...formData };
+            delete dataToSubmit.photo; 
+            delete dataToSubmit.phoneNumber; 
+
+            const response = await fetch(`${API_BASE_URL}/Profile/Patient/Update`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -180,7 +271,21 @@ export const PatientProfile = () => {
             });
 
             if (response.ok) {
-                setProfileData({ ...formData });
+                let newPhotoUrl = profileData.photoUrl;
+
+                if (uploadedPhotoId) {
+                    try {
+                        const photoRes = await fetch(`${DOCUMENTS_API_URL}/Photo/GetPhoto/${encodeURIComponent(uploadedPhotoId)}`, {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        if (photoRes.ok) {
+                            const rawUrl = await photoRes.text();
+                            newPhotoUrl = rawUrl.replace(/^"|"$/g, '');
+                        }
+                    } catch (e) { console.error("Failed to fetch new photo URL", e); }
+                }
+
+                setProfileData({ ...dataToSubmit, phoneNumber: formData.phoneNumber, photoUrl: newPhotoUrl });
                 setIsEditing(false);
             } else {
                 console.error("Failed to update profile", await response.text());
