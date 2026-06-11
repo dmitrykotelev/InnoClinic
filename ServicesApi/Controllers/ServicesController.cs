@@ -20,9 +20,9 @@ namespace ServicesApi.Controllers
         }
 
         [HttpGet("GetBySpec/{specId}")]
-        public async Task<IActionResult> GetBySpec(int specId)
+        public async Task<IActionResult> GetBySpecId(int specId)
         {
-            var response = _servicesRepo.GetBySpec(specId);
+            var response = _servicesRepo.GetBySpecId(specId);
 
             if (response == null)
                 return NotFound();
@@ -39,7 +39,7 @@ namespace ServicesApi.Controllers
                 if (filters == null) 
                     return BadRequest();
 
-                IQueryable<Service> query = _servicesRepo.GetBaseQuery();
+                var query = _servicesRepo.GetBaseQuery();
 
                 _logger.LogWarning(query.ToString());
 

@@ -19,9 +19,9 @@ namespace Middleware.Repository.ServicesRepository
         {
             _serviceRepo = repo;
         }
-        public List<ServiceDto> GetBySpec(int specId)
+        public List<ServiceDto> GetBySpecId(int specId)
         {
-            var response = _mapper.Map<List<ServiceDto>>(_serviceRepo.GetBySpec(specId));
+            var response = _mapper.Map<List<ServiceDto>>(_serviceRepo.GetBySpecId(specId));
 
             return response;
         }

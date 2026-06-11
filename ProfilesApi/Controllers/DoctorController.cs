@@ -13,7 +13,7 @@ namespace ProfilesApi.Controllers
     public class DoctorController : BaseController<Doctor,DoctorDto>
     {
         private DoctorRepoService _doctorRepo;
-        private readonly Filtrator _filtrator = new Filtrator();
+        static private readonly Filtrator _filtrator = new Filtrator();
 
         public DoctorController(DoctorRepoService repo, DoctorValidator validator, ILogger<DoctorController> logger) : base(repo, validator, logger)
         {
@@ -28,7 +28,7 @@ namespace ProfilesApi.Controllers
             using (_logger.BeginScope("Request: {filters}", filters))
             {
                 if (filters == null) return BadRequest();
-                IQueryable<Doctor> query = _doctorRepo.GetBaseQuery();
+                var query = _doctorRepo.GetBaseQuery();
 
                 foreach (FiltredObject filter in filters)
                 {

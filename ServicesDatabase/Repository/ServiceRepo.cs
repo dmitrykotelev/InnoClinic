@@ -9,7 +9,7 @@ namespace ServicesDatabase.Repository
     public class ServiceRepo : Repository<Service>
     {
         public ServiceRepo(ServicesDbConnection database) : base(database) { }
-        public List<Service> GetBySpec (int specId)
+        public List<Service> GetBySpecId (int specId)
         {
             var response = _dbSet.Where(x => x.SpecializationId == specId);
             return response.ToList();

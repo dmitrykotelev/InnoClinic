@@ -16,19 +16,13 @@ namespace AppoitmentsApi.Controllers
         {
             _appoRepo = repo ?? throw new ArgumentException(nameof(AppoitmentRepoService));
         }
-        public class TimeStampRequest
-        {
-            public int DoctorId { get; set; }
-            public DateOnly Date { get; set; }
-            public int SlotSize { get; set; }
-        }
 
         [HttpPost]
         [Route("GetTimeStamps/")]
         public async Task<IActionResult> GetTimeStamps(TimeStampRequest request)
         {
             var allDailySlots = GenerateSlots(WorkDayConstants.workDayStart, WorkDayConstants.workDayEnd, request.SlotSize);
-            var response = _appoRepo.GetAllByDoctor(request.DoctorId, request.Date);
+            var response = _appoRepo.GetAllByDoctorIdDate(request.DoctorId, request.Date);
 
             var busyIntervals = response
                 .Select(inDto => new
@@ -61,9 +55,9 @@ namespace AppoitmentsApi.Controllers
         [Route("GetSealedTimeStamps/{DoctorId}")]
         public async Task<IActionResult> GetSealedTimeStamps(int DoctorId)
         {
-            var response = _appoRepo.GetAllByDoctor(DoctorId);
+            var response = _appoRepo.GetAllByDoctorId(DoctorId);
 
-            Dictionary<DateOnly, List<TimeOnly>> TimeStamps = new Dictionary<DateOnly, List<TimeOnly>>();
+            Dictionary<DateOnly, List<TimeOnly>> timeStamps = new Dictionary<DateOnly, List<TimeOnly>>();
 
             foreach (AppointmentDto dto in response)
             {
@@ -75,10 +69,10 @@ namespace AppoitmentsApi.Controllers
                         times.Add(InDto.Time);
                 }
 
-                TimeStamps.TryAdd(dto.Date, times);
+                timeStamps.TryAdd(dto.Date, times);
             }
 
-            return Ok(TimeStamps);
+            return Ok(timeStamps);
         }
 
         private List<TimeOnly> GenerateSlots(TimeOnly workDayStart, TimeOnly workDayEnd, int slotDurationMinutes)
