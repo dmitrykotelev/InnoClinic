@@ -1,27 +1,49 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import Authorization from "./components/Authorization/Authorization.jsx";
 import { DoctorsModule } from "./components/Views/Doctors/DoctorsModel.jsx";
 import { ServicesModule } from "./components/Views/Services/ServicesModule.jsx";
 import { EntryView } from "./components/Views/EntryView.jsx";
-import { PatientProfileCreation } from "./components/Profile/PatientProfileCreations.jsx";
-import { PatientProfile } from './components/Profile/PatientProfile.jsx';
+import { PatientProfileCreation } from "./components/Profile/Patient/PatientProfileCreations.jsx";
+import { PatientProfile } from './components/Profile/Patient/PatientProfile.jsx';
+import { DoctorProfile } from './components/Profile/Doctor/DoctorProfile.jsx';
+import { AppointmentModal } from './components/Appoitments/AppoitmentModal.jsx';
+import { createAppointment } from './components/Appoitments/AppoitmentApi.js';
 import './styles/Doctors.css';
 import './styles/App.css';
 
-const API_BASE_URL = 'http://localhost:5225';
+const API_BASE_URL = 'http://identity.inno-clinic.com';
 
 const MainApp = () => {
     const navigate = useNavigate();
-    const [currentView, setCurrentView] = useState('main');
+    const location = useLocation();
     
+    const [currentView, setCurrentView] = useState(location.state?.targetView || 'main');
+    const [forceAuthOpen, setForceAuthOpen] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
-
+    useEffect(() => {
+            if (location.state?.targetView) {
+                setCurrentView(location.state.targetView);
+                window.history.replaceState({}, document.title)
+            }
+        }, [location.state]);
+        
     useEffect(() => {
         checkSession();
     }, []);
+    const handleSaveAppointment = async (appointmentData) => {
+            const token = localStorage.getItem('accessToken');
+            const userId = currentUser?.sub || currentUser?.nameid;
 
+            try {
+                await createAppointment(appointmentData, token, userId);
+                console.log("Appointment successfully saved to DB!");
+            } catch (error) {
+                console.error(error.message);
+                alert("Error creating appointment. Please try again.");
+            }
+        };
     const checkSession = async (newToken = null) => {
         const token = newToken || localStorage.getItem('accessToken');
         console.log("App checking session. Token found:", !!token);
@@ -64,6 +86,7 @@ const MainApp = () => {
         if (token && token !== "undefined") {
             checkSession(token);
         }
+        setForceAuthOpen(false); 
     };
 
     const authComponent = (
@@ -73,6 +96,8 @@ const MainApp = () => {
             currentUser={currentUser}
             onLoginSuccess={handleLoginSuccess}
             onLogout={clearSessionState}
+            forceOpen={forceAuthOpen} 
+            onClose={() => setForceAuthOpen(false)} 
         />
     );
 
@@ -94,7 +119,16 @@ const MainApp = () => {
             )}
 
             <div className="top-right-panel">
-                <button className="btn-action">➕ Appointment</button>
+                <AppointmentModal 
+                    isLoggedIn={isLoggedIn}
+                    onSaveAppointment={handleSaveAppointment}
+                    
+                    onRequireAuth={() => {
+                        alert("Sign in to make an appointment");
+                        setForceAuthOpen(true);
+                    }}
+                />
+
                 {isLoggedIn && (
                     <button 
                         className="btn-action" 
@@ -135,6 +169,7 @@ function App() {
                 <Route path="/" element={<MainApp />} />
                 <Route path="/create-profile" element={<PatientProfileCreation />} />
                 <Route path="/profile" element={<PatientProfile />} />
+                <Route path="/doctor/:id" element={<DoctorProfile />} />
             </Routes>
         </BrowserRouter>
     );

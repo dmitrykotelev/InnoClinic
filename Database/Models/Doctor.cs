@@ -1,8 +1,10 @@
 ﻿using BaseModules.DatabaseClasses.DatabaseInterfaces;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
 namespace ProfileDatabase.Models
 {
+    [Index(nameof(FirstName), Name = "Doctor_Name")]
     public class Doctor : IDataModel
     {
         public int Id { get; set; }

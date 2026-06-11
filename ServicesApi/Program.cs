@@ -50,8 +50,6 @@ namespace ServicesApi
                 app.UseSwaggerUI();
             }
 
-            app.UseHttpsRedirection();
-
             app.UseAuthorization();
 
             app.UseCors("AllowReactApp");
@@ -63,18 +61,21 @@ namespace ServicesApi
         private static void AddRepoServices(WebApplicationBuilder builder)
         {
             builder.Services.AddTransient<ServicesRepoService>();
+            builder.Services.AddTransient<ServicesCategoriesRepoService>();
             builder.Services.AddTransient<SpecializationsRepoService>();
         }
 
         private static void AddValidators(WebApplicationBuilder builder)
         {
             builder.Services.AddTransient<ServicesValidator>();
+            builder.Services.AddTransient<ServiceCategoriesValidator>();
             builder.Services.AddTransient<SpecializatioValidator>();
         }
 
         private static void AddRepos(WebApplicationBuilder builder)
         {
             builder.Services.AddTransient<ServiceRepo>();
+            builder.Services.AddTransient<ServiceCategoryRepo>();
             builder.Services.AddTransient<SpecializationRepo>();
         }
     }

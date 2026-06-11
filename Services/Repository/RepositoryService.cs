@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
-using BaseModules.DatabaseClasses.DatabaseInterfaces;
 using BaseModules.DatabaseClasses;
+using BaseModules.DatabaseClasses.DatabaseInterfaces;
+using Microsoft.EntityFrameworkCore;
 using Middleware.Mapper;
+using ProfileDatabase.Models;
 
 namespace Middleware.Repository
 {
@@ -52,6 +54,11 @@ namespace Middleware.Repository
             var data = _mapper.Map<T>(dto);
 
             return _mapper.Map<TT>(_repo.Update(data));
+        }
+
+        public IQueryable<T> GetBaseQuery()
+        {
+            return _repo.GetBaseQuery();
         }
 
         public bool Delete(int id)

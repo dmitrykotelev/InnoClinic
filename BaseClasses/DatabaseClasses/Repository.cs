@@ -1,6 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using BaseModules.DatabaseClasses.DatabaseInterfaces;
+using Microsoft.EntityFrameworkCore;
 using ProfileDatabase.Interfaces;
-using BaseModules.DatabaseClasses.DatabaseInterfaces;
+using System.Numerics;
 
 namespace BaseModules.DatabaseClasses
 {
@@ -63,12 +64,15 @@ namespace BaseModules.DatabaseClasses
 
             return null;
         }
+        public IQueryable<T> GetBaseQuery()
+        {
+            return _dbSet.AsQueryable();
+        }
 
         public virtual int Count()
         {
             return _dbSet.Count();
         }
-
         private bool Save()
         {
             var status = _context.SaveChanges();

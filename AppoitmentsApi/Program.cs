@@ -1,19 +1,19 @@
-using DocumentsDatabase;
+using AppoitmentsDatabase;
+using AppoitmentsDatabase.Core;
 using Microsoft.EntityFrameworkCore;
 using Middleware.Mapper;
-using Middleware.Minio;
-using Middleware.Repository.DocumentsRepository;
-using Middleware.Uploader;
-using Minio;
-using Minio.AspNetCore;
+using Middleware.Repository.AppoitmentsRepository;
+using Middleware.Validator.AppointmentsValidators;
 
-namespace DocumentsApi
+namespace AppoitmentsApi
 {
     public class Program
     {
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddDbContext<AppoitmentDbContext>(options =>
+            options.UseNpgsql(builder.Configuration.GetConnectionString("PostgresConnection")));
 
             var corsSettings = builder.Configuration.GetSection("CorsSettings").Get<CorsSettings>();
             builder.Services.AddCors(options =>
@@ -30,27 +30,15 @@ namespace DocumentsApi
                     });
             });
 
-            builder.Services.AddDbContext<DocumentsDbConnection>(options =>
-                     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
-                     x => x.MigrationsAssembly("DocumentsDatabase")));
-
-            builder.Services.AddAutoMapper(cfg => { }, typeof(MapperProfile).Assembly);
-
-            builder.Services.AddTransient<PhotosRepository>();
-            builder.Services.AddTransient<PhotosRepositoryService>();
-            builder.Services.AddTransient<IFileUploadService, MinioService>();
-
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            builder.Services.AddMinio(options =>
-            {
-                var section = builder.Configuration.GetSection("Minio");
-                options.Endpoint = section["Endpoint"];
-                options.AccessKey = section["AccessKey"];
-                options.SecretKey = section["SecretKey"];
-            });
+            builder.Services.AddAutoMapper(cfg => { }, typeof(MapperProfile).Assembly);
+
+            builder.Services.AddTransient<AppointmentsRepository>();
+            builder.Services.AddTransient<AppoitmentRepoService>();
+            builder.Services.AddTransient<AppointmentsValidator>();
 
             var app = builder.Build();
 
@@ -59,8 +47,10 @@ namespace DocumentsApi
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
             app.UseCors("AllowReactApp");
+
+            app.UseHttpsRedirection();
+
             app.UseAuthorization();
 
 
