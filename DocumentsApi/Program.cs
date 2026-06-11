@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Middleware.Mapper;
 using Middleware.Minio;
 using Middleware.Repository.DocumentsRepository;
-using Middleware.Uploader;
 using Minio;
 using Minio.AspNetCore;
 
@@ -38,7 +37,7 @@ namespace DocumentsApi
 
             builder.Services.AddTransient<PhotosRepository>();
             builder.Services.AddTransient<PhotosRepositoryService>();
-            builder.Services.AddTransient<IFileUploadService, MinioService>();
+            builder.Services.AddTransient<MinioService>();
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();

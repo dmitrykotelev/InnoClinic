@@ -2,6 +2,7 @@
 using Middleware.Mapper;
 using Middleware.Repository.DocumentsRepository;
 using Middleware.Uploader;
+using Middleware.Uploader.Minio;
 
 namespace DocumentsApi.Controllers
 {
@@ -12,7 +13,7 @@ namespace DocumentsApi.Controllers
         private IFileUploadService _minioService;
         private PhotosRepositoryService _photosRepo;
         private ILogger _logger;
-        public PhotosController(IFileUploadService minioService, PhotosRepositoryService photosRepo, ILogger<PhotosController> logger)
+        public PhotosController(MinioService minioService, PhotosRepositoryService photosRepo, ILogger<PhotosController> logger)
         {
 
             _minioService = minioService ?? throw new ArgumentException(nameof(minioService));
