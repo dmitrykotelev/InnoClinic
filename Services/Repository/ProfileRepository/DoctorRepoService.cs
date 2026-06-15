@@ -1,12 +1,32 @@
 ﻿using AutoMapper;
+using Middleware.AppoitnmentFiltrator;
+using Middleware.Mapper.ProfileDto;
+using Middleware.Mapper.ServicesDto;
 using ProfileDatabase.Models;
 using ProfileDatabase.Repository;
-using Middleware.Mapper.ProfileDto;
+using System.Linq.Expressions;
 
 namespace Middleware.Repository.ProfileRepository
 {
-    public class DoctorRepoService : RepositoryService<Doctor, DoctorDto> 
+    public class DoctorRepoService : RepositoryService<Doctor, DoctorDto> , IFilterableRepoService<DoctorDto>
     {
-        public DoctorRepoService(DoctorRepo repo, IMapper mapper) : base(repo, mapper) { }
+        private DoctorRepo _doctorRepo;
+        public DoctorRepoService(DoctorRepo repo, IMapper mapper) : base(repo, mapper)
+        {
+            _doctorRepo = repo;
+        }
+
+        public List<DoctorDto> GetAll(string name)
+        {
+            var response = _mapper.Map<List<DoctorDto>>(_doctorRepo.GetAll(name));
+
+            return response;
+        }
+        public List<DoctorDto> GetAll(IQueryable<Doctor> query)
+        {
+            var response = _mapper.Map<List<DoctorDto>>(_doctorRepo.GetAll(query));
+
+            return response;
+        }
     }
 }

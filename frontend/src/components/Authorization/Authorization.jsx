@@ -1,11 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AuthModal from './AuthModal.jsx';
 
-const Authorization = ({ apiBaseUrl, isLoggedIn, currentUser, onLoginSuccess, onLogout }) => {
+const Authorization = ({ apiBaseUrl, isLoggedIn, currentUser, onLoginSuccess, onLogout, forceOpen, onClose }) => {
     const [isAuthOpen, setIsAuthOpen] = useState(false);
 
-    const handleSuccess = (token) => {
+    useEffect(() => {
+        if (forceOpen) {
+            setIsAuthOpen(true);
+        }
+    }, [forceOpen]);
+
+    const handleCloseModal = () => {
         setIsAuthOpen(false);
+        if (onClose) onClose();
+    };
+
+    const handleSuccess = (token) => {
+        handleCloseModal();
         onLoginSuccess(token);
     };
 
@@ -33,7 +44,7 @@ const Authorization = ({ apiBaseUrl, isLoggedIn, currentUser, onLoginSuccess, on
 
             <AuthModal
                 isOpen={isAuthOpen}
-                onClose={() => setIsAuthOpen(false)}
+                onClose={handleCloseModal}
                 onLoginSuccess={handleSuccess}
                 apiBaseUrl={apiBaseUrl}
             />
