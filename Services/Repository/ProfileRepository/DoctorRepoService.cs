@@ -28,5 +28,11 @@ namespace Middleware.Repository.ProfileRepository
 
             return response;
         }
+        public DoctorDto GetByAccId (string id)
+        {
+            var response = _mapper.Map<DoctorDto>(_doctorRepo.GetByAccId(id));
+
+            return response;
+        }
     }
 }

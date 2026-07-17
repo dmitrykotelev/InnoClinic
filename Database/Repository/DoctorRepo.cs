@@ -20,5 +20,11 @@ namespace ProfileDatabase.Repository
 
             return response;
         }
+        public Doctor GetByAccId(string id)
+        {
+            var response = _dbSet.Where(x => x.AccountId == id).First();
+
+            return response;
+        }
     }
 }

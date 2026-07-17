@@ -1,4 +1,5 @@
 ﻿using Middleware.Mapper;
+using ServicesDatabase.Models;
 
 namespace Middleware.Mapper.ServicesDto
 {
@@ -6,7 +7,7 @@ namespace Middleware.Mapper.ServicesDto
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public bool isActiove { get; set; }
+        public bool isActive { get; set; }
 
     }
 }

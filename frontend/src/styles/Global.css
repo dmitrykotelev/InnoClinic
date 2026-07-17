@@ -1,0 +1,546 @@
+/* =========================================
+   1. VARIABLES & BASE
+   ========================================= */
+:root {
+    /* Colors */
+    --innowise-red: #E30613;
+    --innowise-red-hover: #B30000;
+    --text-main: #333333;
+    --text-muted: #666666;
+    --bg-page: #f5f5f5;
+    --bg-surface: #ffffff;
+    --border-color: #cccccc;
+    --border-light: #e5e7eb;
+    
+    /* Status */
+    --error-color: #dc3545;
+    --success-bg: #d4edda;
+    --success-text: #155724;
+
+    /* Geometry */
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+    --radius-xl: 12px;
+    --radius-round: 50%;
+}
+
+#root {
+    max-width: 100% !important;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: system-ui, -apple-system, sans-serif;
+    color: var(--text-main);
+    background-color: var(--bg-page);
+    margin: 0;
+    padding: 0;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* =========================================
+   2. CONTAINERS & LAYOUTS
+   ========================================= */
+.app-container {
+    width: 100%;
+    min-height: 100vh;
+    padding-top: 80px; 
+    box-sizing: border-box;
+}
+
+.page-container {
+    max-width: 1152px;
+    margin: 20px auto 40px auto; 
+    padding: 30px;
+    
+    background-color: var(--bg-surface);
+    border-radius: var(--radius-xl); 
+    border: 4px solid var(--border-color); 
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); 
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.page-container.sm { max-width: 800px; }
+.page-container.xs { max-width: 500px; }
+
+.main-content {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+}
+
+.top-left-panel {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    gap: 15px;
+    z-index: 1000;
+}
+
+.top-right-panel {
+    position: fixed;
+    top: 15px; /* Чуть прижимаем к верхнему краю (было 20px) */
+    right: 15px; /* Чуть прижимаем к правому краю (было 20px) */
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Уменьшаем расстояние между кнопками (было 15px) */
+    z-index: 1000;
+}
+
+/* Принудительно делаем все кнопки внутри правой панели более компактными */
+.top-right-panel button,
+.top-right-panel .btn-action,
+.top-right-panel .trigger-btn,
+.top-right-panel .btn {
+    padding: 6px 12px !important; /* Уменьшаем внутренние отступы (было 10px 20px) */
+    font-size: 14px !important;   /* Уменьшаем размер шрифта (было 16px) */
+    height: 36px;                 /* Фиксируем небольшую высоту */
+    border-radius: var(--radius-sm); /* Делаем скругление чуть строже */
+}
+
+.flex-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.flex-end {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.mb-3 { margin-bottom: 12px; }
+.mb-4 { margin-bottom: 24px; }
+.mt-2 { margin-top: 8px; }
+.mt-3 { margin-top: 16px; }
+.mt-4 { margin-top: 24px; }
+
+.grid-1-to-2 { display: grid; grid-template-columns: 1fr; gap: 24px; }
+.grid-4-cols { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+@media (min-width: 640px) { .grid-1-to-2 { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1024px) { .grid-1-to-2 { grid-template-columns: repeat(3, 1fr); } }
+
+/* =========================================
+   3. BUTTONS
+   ========================================= */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.btn:disabled {
+    background-color: var(--border-color) !important;
+    color: var(--text-muted) !important;
+    cursor: not-allowed;
+    border: none;
+}
+
+.btn-primary {
+    background-color: var(--innowise-red);
+    color: white;
+}
+.btn-primary:hover:not(:disabled) {
+    background-color: var(--innowise-red-hover);
+}
+
+.btn-secondary {
+    background-color: var(--bg-page);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+}
+.btn-secondary:hover:not(:disabled) {
+    background-color: var(--border-light);
+}
+
+.btn-text, .btn-go-back {
+    background: none;
+    color: var(--text-muted);
+    border: none;
+    padding: 0;
+    font-size: 14px;
+    cursor: pointer;
+}
+.btn-text:hover, .btn-go-back:hover {
+    color: var(--innowise-red);
+    text-decoration: underline;
+}
+
+/* =========================================
+   4. FORMS & INPUTS
+   ========================================= */
+.form-group {
+    margin-bottom: 16px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: var(--text-main);
+    font-size: 14px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-size: 16px;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background-color: var(--bg-surface);
+    color: var(--text-main);
+}
+
+.form-control:focus {
+    border-color: var(--innowise-red);
+    box-shadow: 0 0 0 2px rgba(227, 6, 19, 0.2);
+}
+
+.form-control.is-invalid {
+    border-color: var(--error-color) !important;
+}
+
+.error-msg {
+    color: var(--error-color);
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.combo-dropdown {
+    position: absolute;
+    top: 100%; left: 0; right: 0;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    max-height: 150px;
+    overflow-y: auto;
+    z-index: 10;
+    margin: 0; padding: 0;
+    list-style: none;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+.combo-dropdown li { padding: 10px; cursor: pointer; }
+.combo-dropdown li:hover { background-color: var(--bg-page); }
+
+/* =========================================
+   5. MODALS & OVERLAYS
+   ========================================= */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.4); 
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px); 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1100; 
+    animation: fadeIn 0.2s ease-out;
+}
+
+.modal-overlay.top-tier { z-index: 1200; } 
+
+.modal-card {
+    background: var(--bg-surface);
+    border-radius: var(--radius-xl);
+    padding: 24px;
+    width: 90%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.2); 
+}
+
+.modal-card.md { max-width: 500px; }
+.modal-card.sm { max-width: 350px; text-align: center; } 
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--border-light);
+    padding-bottom: 12px;
+}
+
+.modal-header h2, .modal-header h3 { margin: 0; font-size: 20px; color: var(--text-main); }
+
+.btn-close {
+    background: none; border: none; font-size: 28px;
+    cursor: pointer; color: var(--text-muted);
+}
+.btn-close:hover { color: var(--text-main); }
+
+.modal-body { overflow-y: auto; padding: 4px 0; }
+
+.modal-footer {
+    display: flex; justify-content: flex-end; gap: 12px;
+    margin-top: 20px; padding-top: 16px;
+    border-top: 1px solid var(--border-light);
+}
+
+/* =========================================
+   6. COMPONENTS (Cards, Slots, Tabs, Photos)
+   ========================================= */
+.data-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.avatar {
+    border-radius: var(--radius-round);
+    object-fit: cover;
+    border: 4px solid var(--bg-page);
+}
+.avatar.lg { width: 180px; height: 180px; }
+.avatar.md { width: 96px; height: 96px; margin: 0 auto 16px auto; }
+
+.time-slots-grid { 
+    display: grid; 
+    /* Заменили жесткие 4 колонки на адаптивные, чтобы кнопкам хватало ширины */
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); 
+    gap: 10px; 
+}
+
+.time-slots-grid.disabled { 
+    opacity: 0.5; 
+    pointer-events: none; 
+}
+
+.time-slot {
+    padding: 8px; 
+    border: 1px solid var(--border-color);
+    background: var(--text-main); 
+    color: white;
+    border-radius: var(--radius-sm); 
+    cursor: pointer;
+    text-align: center; 
+    font-size: 14px;
+    white-space: nowrap; 
+}
+
+.time-slot:hover { 
+    border-color: var(--innowise-red); 
+}
+
+.time-slot.selected { 
+    background: var(--innowise-red); 
+    border-color: var(--innowise-red); 
+}
+.tabs-bar { display: flex; gap: 12px; margin-bottom: 24px; border-bottom: 2px solid var(--border-light); overflow-x: auto; }
+.tab-btn {
+    padding: 10px 20px; background: transparent; color: var(--text-muted);
+    border: none; border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    font-size: 16px; font-weight: 500; cursor: pointer; white-space: nowrap;
+}
+.tab-btn:hover:not(:disabled) { color: var(--text-main); background: var(--bg-page); }
+.tab-btn.active { color: var(--innowise-red); font-weight: bold; border-bottom: 3px solid var(--innowise-red); }
+
+.empty-state {
+    text-align: center; padding: 60px 20px;
+    background-color: var(--bg-page);
+    border-radius: var(--radius-xl);
+    border: 2px dashed var(--border-color);
+    color: var(--text-muted); font-size: 18px;
+}
+
+/* =========================================
+   7. TABLES & LISTS
+   ========================================= */
+.table-responsive {
+    overflow-x: auto;
+    width: 100%;
+    background: var(--bg-surface);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color); 
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse; 
+    font-size: 14px;
+    text-align: left;
+}
+
+.data-table th, .data-table td {
+    padding: 12px;
+    border: 1px solid var(--border-color); 
+}
+
+.data-table thead tr { background-color: var(--bg-page); }
+.data-table tbody tr { transition: background-color 0.2s ease; }
+.data-table tbody tr:hover { background-color: #f9fafb; }
+
+.row-unapproved { background-color: #fffcf2; }
+.row-unapproved td:first-child { box-shadow: inset 4px 0 0 0 #ffc107; }
+.row-approved td:first-child { box-shadow: inset 4px 0 0 0 var(--success-text); }
+.data-table tbody tr.row-unapproved:hover { background-color: #fff8e1; }
+
+.badge {
+    padding: 4px 8px; border-radius: var(--radius-sm); font-size: 12px; font-weight: bold;
+}
+.badge-success { background: var(--success-bg); color: var(--success-text); }
+.badge-error { background: #f8d7da; color: var(--error-color); }
+.badge-warning { background: #fff3cd; color: #856404; }
+
+/* =========================================
+   8. DOCTOR CARDS 
+   ========================================= */
+.doctor-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color); 
+    border-radius: var(--radius-xl);
+    padding: 24px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
+    transition: all 0.3s ease; 
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.doctor-card:hover {
+    box-shadow: 0 15px 25px rgba(0,0,0,0.1);
+    border-color: var(--innowise-red);
+    transform: translateY(-4px); 
+}
+
+.doctor-photo {
+    width: 96px; 
+    height: 96px;
+    border-radius: 50%;
+    margin: 0 auto 16px auto;
+    border: 4px solid var(--bg-page);
+    object-fit: cover;
+    display: block;
+}
+
+.doctor-name {
+    font-size: 18px; 
+    font-weight: bold; 
+    text-align: center;
+    color: var(--text-main);
+    margin: 0 0 8px 0; 
+    line-height: 1.2;
+}
+
+.doctor-spec {
+    color: var(--innowise-red); 
+    text-align: center;
+    font-size: 14px; 
+    font-weight: 600; 
+    text-transform: uppercase;
+    letter-spacing: 0.05em; 
+    margin: 0 0 24px 0;
+}
+
+.doctor-info-divider {
+    border-top: 1px solid var(--border-light);
+    padding-top: 16px; 
+    margin-bottom: 24px; 
+    flex-grow: 1;
+}
+
+.doctor-info-row {
+    display: flex; 
+    justify-content: space-between;
+    font-size: 14px; 
+    margin-bottom: 8px;
+}
+
+.doctor-info-label { color: var(--text-muted); }
+.doctor-info-value { font-weight: bold; color: var(--text-main); text-align: right; max-width: 150px; }
+
+/* =========================================
+   9. FILTERS BAR 
+   ========================================= */
+.filters-bar {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-bottom: 32px;
+    background-color: var(--bg-surface);
+    padding: 16px;
+    border-radius: var(--radius-xl);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border-light);
+    align-items: end; 
+}
+
+@media (min-width: 768px) {
+    .filters-bar { grid-template-columns: repeat(4, 1fr); }
+}
+
+.filter-control {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    outline: none;
+    box-sizing: border-box;
+    font-size: 14px;
+    background-color: var(--bg-surface);
+    color: var(--text-main);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.filter-control:focus {
+    border-color: var(--innowise-red);
+    box-shadow: 0 0 0 2px rgba(227, 6, 19, 0.15);
+}
+
+.btn-map-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: var(--radius-md);
+    border: none;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+    width: 100%;
+    height: 40px; 
+    box-sizing: border-box;
+}
+
+.btn-map-toggle.active { background-color: var(--innowise-red); color: white; }
+.btn-map-toggle.inactive { background-color: var(--bg-page); color: var(--text-main); border: 1px solid var(--border-color); }
+.btn-map-toggle.inactive:hover { background-color: var(--border-light); }

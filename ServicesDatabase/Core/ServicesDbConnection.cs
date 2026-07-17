@@ -22,9 +22,9 @@ namespace ServicesDatabase.Core
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<Specialization>().HasData(
-                new Specialization { Id = 1, Name = "General Therapy", isActiove = true },
-                new Specialization { Id = 2, Name = "Cardiology", isActiove = true },
-                new Specialization { Id = 3, Name = "Dentistry", isActiove = true }
+                new Specialization { Id = 1, Name = "General Therapy", isActive = true },
+                new Specialization { Id = 2, Name = "Cardiology", isActive = true },
+                new Specialization { Id = 3, Name = "Dentistry", isActive = true }
             );
 
             modelBuilder.Entity<ServiceCategory>().HasData(

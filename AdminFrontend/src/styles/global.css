@@ -1,0 +1,613 @@
+/* =========================================
+   1. VARIABLES & BASE
+   ========================================= */
+:root {
+    /* Colors */
+    --innowise-red: #E30613;
+    --innowise-red-hover: #B30000;
+    --text-main: #333333;
+    --text-muted: #666666;
+    --bg-page: #f5f5f5;
+    --bg-surface: #ffffff;
+    --border-color: #cccccc;
+    --border-light: #e5e7eb;
+    
+    /* Status */
+    --error-color: #dc3545;
+    --success-bg: #d4edda;
+    --success-text: #155724;
+
+    /* Geometry */
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+    --radius-xl: 12px;
+    --radius-round: 50%;
+}
+
+/* Снимаем жесткие ограничения Vite с корневого элемента */
+#root {
+    max-width: 100% !important; /* Перебиваем дефолтные 1280px Vite */
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: system-ui, -apple-system, sans-serif;
+    color: var(--text-main);
+    background-color: var(--bg-page);
+    margin: 0;
+    padding: 0;
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* =========================================
+   2. CONTAINERS & LAYOUTS
+   ========================================= */
+/* Настраиваем глобальный контейнер, чтобы контент не залезал под кнопки/хедер */
+.app-container {
+    width: 100%;
+    min-height: 100vh;
+    padding-top: 80px; /* Место под фиксированные верхние панели */
+    box-sizing: border-box;
+}
+
+/* Универсальный контейнер для страниц (Doctors, Profile, Services, Appointments) */
+/* Универсальный контейнер для страниц */
+.page-container {
+    max-width: 1152px;
+    margin: 20px auto 40px auto; /* Отступы сверху и снизу */
+    padding: 30px;
+    
+    
+    /* --- НОВЫЙ СТИЛЬ: ВЫДЕЛЕНИЕ ВЬЮШКИ --- */
+    background-color: var(--bg-surface); /* Белый фон карточки */
+    border: 4px solid var(--border-color); /* Аккуратная рамка */
+    border-radius: var(--radius-xl); /* Скругленные углы */
+    border-color: #ff0606;
+    box-shadow: 0 4px 15px rgba(255, 0, 0, 0.05); /* Легкая тень */
+    
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.page-container.sm { max-width: 800px; }
+.page-container.xs { max-width: 500px; }
+
+/* Основной контент по центру */
+.main-content {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* ЛЕВЫЙ ВЕРХНИЙ УГОЛ (Фиксируем к окну) */
+.top-left-panel {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    gap: 15px;
+    z-index: 1000;
+}
+
+/* ПРАВЫЙ ВЕРХНИЙ УГОЛ (Фиксируем к окну) */
+.top-right-panel {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    z-index: 1000;
+}
+
+/* Общие сетки */
+.grid-1-to-2 { display: grid; grid-template-columns: 1fr; gap: 24px; }
+.grid-4-cols { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+@media (min-width: 640px) { .grid-1-to-2 { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1024px) { .grid-1-to-2 { grid-template-columns: repeat(3, 1fr); } }
+
+/* =========================================
+   3. BUTTONS
+   ========================================= */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.btn:disabled {
+    background-color: var(--border-color);
+    color: var(--text-muted);
+    cursor: not-allowed;
+}
+
+/* Красные кнопки (Primary) */
+.btn-primary {
+    background-color: var(--innowise-red);
+    color: white;
+}
+.btn-primary:hover:not(:disabled) {
+    background-color: var(--innowise-red-hover);
+}
+
+/* Серые/белые кнопки (Secondary / Cancel) */
+.btn-secondary {
+    background-color: var(--bg-page);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+}
+.btn-secondary:hover:not(:disabled) {
+    background-color: var(--border-light);
+}
+
+/* Кнопки в виде текста (Назад / Ссылки) */
+.btn-text {
+    background: none;
+    color: var(--text-muted);
+    padding: 0;
+    font-size: 14px;
+}
+.btn-text:hover {
+    color: var(--innowise-red);
+    text-decoration: underline;
+}
+
+/* =========================================
+   4. FORMS & INPUTS
+   ========================================= */
+.form-group {
+    margin-bottom: 16px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: var(--text-main);
+    font-size: 14px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-size: 16px;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background-color: var(--bg-surface);
+    color: var(--text-main);
+}
+
+.form-control:focus {
+    border-color: var(--innowise-red);
+    box-shadow: 0 0 0 2px rgba(227, 6, 19, 0.2);
+}
+
+/* Тёмная тема для инпутов, где требуется */
+.form-control.dark-mode,
+select.form-control.dark-mode,
+input[type="date"].form-control.dark-mode {
+    background-color: #4a4a4a !important;
+    color: #ffffff !important;
+    color-scheme: dark;
+}
+.form-control.dark-mode:focus { background-color: #555 !important; }
+
+/* Ошибки */
+.form-control.is-invalid {
+    border-color: var(--error-color) !important;
+}
+
+.error-msg {
+    color: var(--error-color);
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+/* Combobox Dropdown */
+.combo-dropdown {
+    position: absolute;
+    top: 100%; left: 0; right: 0;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    max-height: 150px;
+    overflow-y: auto;
+    z-index: 10;
+    margin: 0; padding: 0;
+    list-style: none;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+.combo-dropdown li { padding: 10px; cursor: pointer; }
+.combo-dropdown li:hover { background-color: var(--bg-page); }
+
+/* =========================================
+   5. MODALS & OVERLAYS
+   ========================================= */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    /* Делаем фон чуть прозрачнее, так как основную работу сделает размытие */
+    background-color: rgba(0, 0, 0, 0.4); 
+    
+    /* Добавляем эффект "матового стекла" (размытие всего, что позади) */
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px); /* Поддержка для Safari */
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1100; 
+    animation: fadeIn 0.2s ease-out;
+}
+
+.modal-overlay.top-tier { z-index: 1200; } /* Для диалогов отмены поверх основной модалки */
+
+.modal-card {
+    background: var(--bg-surface);
+    border-radius: var(--radius-xl);
+    padding: 24px;
+    width: 90%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    
+    /* Усиливаем тень, чтобы карточка визуально "парила" над размытым фоном */
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.2); /* Легкий контур для контраста */
+}
+
+.modal-card.md { max-width: 500px; }
+.modal-card.sm { max-width: 350px; text-align: center; } 
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--border-light);
+    padding-bottom: 12px;
+}
+
+.modal-header h2, .modal-header h3 { margin: 0; font-size: 20px; color: var(--text-main); }
+
+.btn-close {
+    background: none; border: none; font-size: 28px;
+    cursor: pointer; color: var(--text-muted);
+}
+.btn-close:hover { color: var(--text-main); }
+
+.modal-body { overflow-y: auto; padding: 4px 0; }
+
+.modal-footer {
+    display: flex; justify-content: flex-end; gap: 12px;
+    margin-top: 20px; padding-top: 16px;
+    border-top: 1px solid var(--border-light);
+}
+.modal-footer.center { justify-content: center; }
+
+/* =========================================
+   6. COMPONENTS (Cards, Slots, Tabs, Photos)
+   ========================================= */
+.data-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-xl);
+    padding: 24px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    transition: box-shadow 0.2s, border-color 0.2s;
+}
+.data-card:hover { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border-color: var(--border-color); }
+
+.avatar {
+    border-radius: var(--radius-round);
+    object-fit: cover;
+    border: 4px solid var(--bg-page);
+}
+.avatar.lg { width: 180px; height: 180px; }
+.avatar.md { width: 96px; height: 96px; margin: 0 auto 16px auto; }
+
+.time-slots-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.time-slots-grid.disabled { opacity: 0.5; pointer-events: none; }
+.time-slot {
+    padding: 8px; border: 1px solid var(--border-color);
+    background: var(--text-main); color: white;
+    border-radius: var(--radius-sm); cursor: pointer;
+    text-align: center; font-size: 14px;
+}
+.time-slot:hover { border-color: var(--innowise-red); }
+.time-slot.selected { background: var(--innowise-red); border-color: var(--innowise-red); }
+
+.tabs-bar { display: flex; gap: 12px; margin-bottom: 24px; border-bottom: 2px solid var(--border-light); overflow-x: auto; }
+.tab-btn {
+    padding: 10px 20px; background: transparent; color: var(--text-muted);
+    border: none; border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    font-size: 16px; font-weight: 500; cursor: pointer; white-space: nowrap;
+}
+.tab-btn:hover:not(:disabled) { color: var(--text-main); background: var(--bg-page); }
+.tab-btn.active { color: var(--innowise-red); font-weight: bold; border-bottom: 3px solid var(--innowise-red); }
+
+.empty-state {
+    text-align: center; padding: 60px 20px;
+    background-color: var(--bg-page);
+    border-radius: var(--radius-xl);
+    border: 2px dashed var(--border-color);
+    color: var(--text-muted); font-size: 18px;
+}
+
+/* =========================================
+   7. TABLES & LISTS (Обновленные рамки)
+   ========================================= */
+
+/* --- Классические таблицы (Приемы и т.д.) --- */
+.table-responsive {
+    overflow-x: auto;
+    width: 100%;
+    background: var(--bg-surface);
+    border-radius: var(--radius-lg);
+    /* Добавляем внешнюю рамку всей таблице */
+    border: 1px solid var(--border-color); 
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse; /* Склеиваем рамки соседних ячеек в одну тонкую линию */
+    font-size: 14px;
+    text-align: left;
+}
+
+/* Рамочки для КАЖДОЙ ячейки со всех сторон */
+.data-table th, .data-table td {
+    padding: 12px;
+    border: 1px solid var(--border-color); 
+}
+
+.data-table thead tr {
+    background-color: var(--bg-page);
+}
+
+/* Подсветка целой строки таблицы при наведении для удобства чтения */
+.data-table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.data-table tbody tr:hover {
+    background-color: #f9fafb; /* Очень-очень светлый серый оттенок */
+}
+
+
+/* --- Списки в виде сеток (Специализации, Услуги) --- */
+.tab-content ul {
+    list-style-type: none;
+    padding: 0; 
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+}
+
+@media (min-width: 768px) { 
+    .tab-content ul { 
+        grid-template-columns: repeat(2, 1fr); 
+    } 
+}
+
+/* Каждая специализация теперь как мини-карточка */
+.tab-content li {
+    padding: 16px;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color); /* Четкая рамка */
+    border-radius: var(--radius-md); /* Скругленные углы */
+    color: var(--text-main);
+    font-size: 15px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    transition: all 0.2s ease;
+}
+
+/* Эффект наведения, как у карточек докторов, но чуть мягче */
+.tab-content li:hover {
+    border-color: var(--innowise-red);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    transform: translateY(-2px); 
+    cursor: pointer;
+}
+
+.row-unapproved {
+    background-color: #fffcf2; /* Очень легкий желтоватый фон для привлечения внимания */
+}
+
+/* Добавляем цветовую полоску к первой ячейке в строке */
+.row-unapproved td:first-child {
+    box-shadow: inset 4px 0 0 0 #ffc107; /* Оранжево-желтая полоска */
+}
+
+.row-approved td:first-child {
+    box-shadow: inset 4px 0 0 0 var(--success-text); /* Зеленая полоска */
+}
+
+/* Чтобы при наведении фон не перекрывал нашу логику: */
+.data-table tbody tr.row-unapproved:hover {
+    background-color: #fff8e1; /* Чуть темнее желтый при наведении */
+}
+
+/* =========================================
+   8. DOCTOR CARDS (Специфичные стили)
+   ========================================= */
+.doctor-card {
+    background-color: var(--bg-surface);
+    /* 1. Делаем базовую рамку более четкой (--border-color вместо --border-light) */
+    border: 1px solid var(--border-color); 
+    border-radius: var(--radius-xl);
+    padding: 24px;
+    /* 2. Делаем базовую тень чуть мягче */
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
+    /* Плавная анимация для тени, рамки и движения */
+    transition: all 0.3s ease; 
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.doctor-card:hover {
+    /* 3. При наведении тень увеличивается */
+    box-shadow: 0 15px 25px rgba(0,0,0,0.1);
+    /* 4. Рамка становится фирменной красной */
+    border-color: var(--innowise-red);
+    /* 5. Карточка "всплывает" на 4 пикселя вверх */
+    transform: translateY(-4px); 
+}
+
+.doctor-photo {
+    width: 96px; 
+    height: 96px;
+    border-radius: 50%;
+    margin: 0 auto 16px auto;
+    border: 4px solid var(--bg-page);
+    object-fit: cover;
+    display: block;
+}
+
+.doctor-name {
+    font-size: 18px; 
+    font-weight: bold; 
+    text-align: center;
+    color: var(--text-main);
+    margin: 0 0 8px 0; 
+    line-height: 1.2;
+}
+
+.doctor-spec {
+    color: var(--innowise-red); 
+    text-align: center;
+    font-size: 14px; 
+    font-weight: 600; 
+    text-transform: uppercase;
+    letter-spacing: 0.05em; 
+    margin: 0 0 24px 0;
+}
+
+.doctor-info-divider {
+    border-top: 1px solid var(--border-light);
+    padding-top: 16px; 
+    margin-bottom: 24px; 
+    flex-grow: 1;
+}
+
+.doctor-info-row {
+    display: flex; 
+    justify-content: space-between;
+    font-size: 14px; 
+    margin-bottom: 8px;
+}
+
+.doctor-info-label { 
+    color: var(--text-muted); 
+}
+
+.doctor-info-value { 
+    font-weight: bold; 
+    color: var(--text-main);
+    text-align: right; 
+    max-width: 150px; 
+}
+
+/* =========================================
+   9. FILTERS BAR & SEARCH INPUTS
+   ========================================= */
+/* Контейнер панели фильтров (заменяет старый .filters-bar) */
+.filters-bar {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-bottom: 32px;
+    background-color: var(--bg-surface);
+    padding: 16px;
+    border-radius: var(--radius-xl);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border-light);
+    align-items: end; /* Выравнивает инпуты и кнопку по нижней линии */
+}
+
+/* На десктопах выстраиваем в 4 колонки (три инпута + кнопка карты) */
+@media (min-width: 768px) {
+    .filters-bar {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* Общие стили для инпутов внутри фильтров (заменяет .filter-input, .filter-select) */
+.filter-control {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    outline: none;
+    box-sizing: border-box;
+    font-size: 14px;
+    background-color: var(--bg-surface);
+    color: var(--text-main);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.filter-control:focus {
+    border-color: var(--innowise-red);
+    box-shadow: 0 0 0 2px rgba(227, 6, 19, 0.15);
+}
+
+/* Специальные стили для кнопки переключения карты */
+.btn-map-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: var(--radius-md);
+    border: none;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+    width: 100%;
+    height: 40px; /* Фиксированная высота вровень с инпутами */
+    box-sizing: border-box;
+}
+
+.btn-map-toggle.active {
+    background-color: var(--innowise-red);
+    color: white;
+}
+
+.btn-map-toggle.inactive {
+    background-color: var(--bg-page);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+}
+
+.btn-map-toggle.inactive:hover {
+    background-color: var(--border-light);
+}

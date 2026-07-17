@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Middleware.Repository.ServicesRepository;
 using Middleware.Validator.ServicesValidators;
 using ServicesDatabase.Core;
@@ -36,23 +37,78 @@ namespace ServicesApi
             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
                                  x => x.MigrationsAssembly("ServicesDatabase")));
 
-            builder.Services.AddAutoMapper(cfg => { },
-                 typeof(MapperProfile).Assembly);
+            builder.Services.AddAutoMapper(cfg => { }, typeof(MapperProfile).Assembly);
 
             AddRepos(builder);
             AddValidators(builder);
             AddRepoServices(builder);
 
+            // === НАСТРОЙКА JWT АВТОРИЗАЦИИ ДЛЯ DOCKER ===
+            var internalIdentityUrl = "http://identityserver:8080";
+            var externalIdentityUrl = "http://identity.inno-clinic.com";
+
+            var httpClient = new HttpClient();
+            httpClient.Timeout = TimeSpan.FromSeconds(10);
+            Thread.Sleep(3000);
+
+            try
+            {
+                var jwksJson = httpClient.GetStringAsync($"{internalIdentityUrl}/.well-known/openid-configuration/jwks").Result;
+                var jwks = new JsonWebKeySet(jwksJson);
+
+                builder.Services.AddAuthentication("Bearer")
+                    .AddJwtBearer("Bearer", options =>
+                    {
+                        options.MetadataAddress = $"{internalIdentityUrl}/.well-known/openid-configuration";
+                        options.RequireHttpsMetadata = false;
+                        options.MapInboundClaims = false;
+
+                        options.TokenValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateAudience = false,
+                            RoleClaimType = "role",
+                            NameClaimType = "name",
+                            ValidateIssuer = true,
+                            ValidIssuer = externalIdentityUrl,
+                            IssuerSigningKeys = jwks.GetSigningKeys(),
+                            ValidateIssuerSigningKey = true
+                        };
+                    });
+                builder.Services.AddAuthorization();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка скачивания ключей JWT: {ex.Message}");
+            }
+
             var app = builder.Build();
+
+            // Автоматическое применение миграций при запуске
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                try
+                {
+                    var context = services.GetRequiredService<ServicesDbConnection>();
+                    context.Database.Migrate();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Ошибка при применении миграций: {ex.Message}");
+                }
+            }
+
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
 
+            app.UseCors("AllowReactApp");
+
+            app.UseAuthentication(); // Добавлено
             app.UseAuthorization();
 
-            app.UseCors("AllowReactApp");
             app.MapControllers();
 
             app.Run();

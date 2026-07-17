@@ -1,0 +1,164 @@
+services:
+  # ==========================================
+  # ИНФРАСТРУКТУРА (БАЗЫ ДАННЫХ И ХРАНИЛИЩА)
+  # ==========================================
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: clinic-mssql
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=${MsSqlPassword}
+    ports:
+      - "${MsSqlPort}"
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd", "-C", "-U", "sa", "-P", "${MsSqlPassword}", "-Q", "SELECT 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: clinic-postgres
+    environment:
+      - POSTGRES_USER=${PostgressUser}
+      - POSTGRES_PASSWORD=${PostgressPassword}
+      - POSTGRES_DB=${PostgresDbName}
+    ports:
+      - "${PostgressPort}"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PostgressUser}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongo:
+    image: mongo:latest
+    container_name: clinic-mongodb
+    ports:
+      - "${MongoPort}"
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:${MongoInternalPort}/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    container_name: clinic-minio
+    command: server /data --console-address ":9001"
+    environment:
+      - MINIO_ROOT_USER=${MinioUser}
+      - MINIO_ROOT_PASSWORD=${MinioPassword}
+    ports:
+      - "${MinioApiPort}"
+      - "${MinioConsolePort}"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${MinioInternalPort}/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ==========================================
+  # МИКРОСЕРВИСЫ (API)
+  # ==========================================
+  apigateway:
+    image: clinic-gateway
+    build:
+      context: .
+      dockerfile: ./ApiGateway/Dockerfile
+    container_name: clinic-gateway
+    environment:
+      - ASPNETCORE_URLS=http://+:${ApiInternalPort}
+    ports:
+      - "${GatewayPort}"
+    depends_on:
+      - identityserver
+      - profilesapi
+      - servicesapi
+      - officesapi
+      - documentsapi
+      - appoitmentsapi
+
+  identityserver:
+    image: clinic-identity
+    build:
+      context: .
+      dockerfile: ./identityserver/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:${ApiInternalPort}
+      - ConnectionStrings__DefaultConnection=Server=mssql;Database=${IdentityDbName};User Id=sa;Password=${MsSqlPassword};TrustServerCertificate=True;
+    depends_on:
+      mssql:
+        condition: service_healthy
+
+  profilesapi:
+    image: clinic-profiles
+    build:
+      context: .
+      dockerfile: ./ProfilesApi/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:${ApiInternalPort}
+      - ConnectionStrings__DefaultConnection=Server=mssql;Database=${ProfilesDbName};User Id=sa;Password=${MsSqlPassword};TrustServerCertificate=True;
+    depends_on:
+      mssql:
+        condition: service_healthy
+
+  servicesapi:
+    image: clinic-services
+    build:
+      context: .
+      dockerfile: ./ServicesApi/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:${ApiInternalPort}
+      - ConnectionStrings__DefaultConnection=Server=mssql;Database=${ServicesDbName};User Id=sa;Password=${MsSqlPassword};TrustServerCertificate=True;
+    depends_on:
+      mssql:
+        condition: service_healthy
+
+  officesapi:
+    image: clinic-offices
+    build:
+      context: .
+      dockerfile: ./OfficesApi/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:${ApiInternalPort}
+      - ConnectionStrings__MongoConnection=mongodb://mongo:${MongoInternalPort}/
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  documentsapi:
+    image: clinic-documents
+    build:
+      context: .
+      dockerfile: ./DocumentsApi/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:${ApiInternalPort}
+      - ConnectionStrings__DefaultConnection=Server=mssql;Database=${DocumentsDbName};User Id=sa;Password=${MsSqlPassword};TrustServerCertificate=True;
+      - Minio__Endpoint=minio:${MinioInternalPort}
+      - Minio__AccessKey=${MinioUser}
+      - Minio__SecretKey=${MinioPassword}
+      - Minio__Secure=false
+    depends_on:
+      mssql:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+
+  appoitmentsapi:
+    image: clinic-appointments
+    build:
+      context: .
+      dockerfile: ./appoitmentsapi/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:${ApiInternalPort}
+      - ConnectionStrings__PostgresConnection=Host=postgres;Port=${PostgresInternalPort};Database=${PostgresDbName};Username=${PostgressUser};Password=${PostgressPassword}
+    depends_on:
+      postgres:
+        condition: service_healthy

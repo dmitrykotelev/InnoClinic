@@ -23,6 +23,8 @@ namespace Middleware.Mapper
             CreateMap<Service, ServiceDto>().ReverseMap();
             CreateMap<Office, OfficeDto>().ReverseMap();
             CreateMap<Appoitment,AppointmentDto>().ReverseMap();
+            CreateMap<Reception, ReceptionDto>().ReverseMap();
+            CreateMap<AppoitmentResult, AppoitmentResultDto>().ReverseMap();
         }
     }
 }

@@ -49,34 +49,19 @@ const Authorization = ({ apiBaseUrl, isLoggedIn, currentUser, onLoginSuccess, on
                 apiBaseUrl={apiBaseUrl}
             />
 
-            <header style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
-                {isLoggedIn && currentUser ? (
-                    <div>
-                        <h2 style={{ color: 'white', fontWeight: 'bold' }}>
-                            Hello, {displayName}!
-                        </h2>
+            <header style={{ padding: '10px', maxWidth: '600px', margin: '0 auto' }}>
+    {isLoggedIn && currentUser ? (
+        <div>
+            <h2 style={{ color: 'black', fontWeight: 'bold', fontSize: '18px', margin: '0 0 10px 0' }}>
+                Hello, {displayName}!
+            </h2>
 
-                        <div style={{
-                            marginTop: '20px',
-                            backgroundColor: '#1e1e1e',
-                            padding: '15px',
-                            borderRadius: '8px',
-                            border: '1px solid #333',
-                            textAlign: 'left',
-                            overflowX: 'auto'
-                        }}>
-                            <h3 style={{ color: '#888', marginTop: 0, fontSize: '14px', textTransform: 'uppercase' }}>
-                                Данные профиля (UserInfo):
-                            </h3>
-                            <pre style={{ color: '#4caf50', fontSize: '14px', margin: 0 }}>
-                                {JSON.stringify(currentUser, null, 4)}
-                            </pre>
-                        </div>
-                    </div>
-                ) : (
-                    <span style={{ color: 'gray' }}>Not logged in</span>
-                )}
-            </header>
+            
+        </div>
+    ) : (
+        <span style={{ color: 'gray', fontSize: '14px' }}>Not logged in</span>
+    )}
+</header>
         </div>
     );
 };

@@ -1,0 +1,43 @@
+/* 1. Снимаем жесткие ограничения Vite с корневого элемента */
+#root {
+    max-width: 100% !important; /* Перебиваем дефолтные 1280px */
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+/* 2. Настраиваем контейнер, чтобы контент не залезал под кнопки */
+.app-container {
+    width: 100%;
+    min-height: 100vh;
+    padding-top: 80px; /* Место под верхнюю панель */
+    box-sizing: border-box;
+}
+
+/* 3. ЛЕВЫЙ ВЕРХНИЙ УГОЛ (Фиксируем к окну) */
+.top-left-panel {
+    position: fixed; /* ИСПОЛЬЗУЕМ FIXED ВМЕСТО ABSOLUTE */
+    top: 20px;
+    left: 20px;
+    display: flex;
+    gap: 15px;
+    z-index: 1000; /* Ставим повыше, чтобы точно было поверх всего */
+}
+
+/* 4. ПРАВЫЙ ВЕРХНИЙ УГОЛ (Фиксируем к окну) */
+.top-right-panel {
+    position: fixed; /* ИСПОЛЬЗУЕМ FIXED ВМЕСТО ABSOLUTE */
+    top: 20px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    z-index: 1000;
+}
+
+/* 5. Основной контент по центру */
+.main-content {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+}

@@ -43,13 +43,12 @@ namespace BaseApi.Controllers
             }
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        [HttpGet("{id:}")]
+        public virtual async Task<IActionResult> GetById(int id)
         {
             using (_logger.BeginScope("Request: {id}", id))
             {
                 var data = _repo.GetById(id);
-                _logger.LogInformation($"Got GetById Request with {data.GetType().Name} by {id} ID");
 
                 if (data == null)
                     return NotFound();
@@ -62,7 +61,7 @@ namespace BaseApi.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public virtual async Task<IActionResult> Delete(int id)
         {
             using (_logger.BeginScope("Request to : {repoType}", _repo.GetType().Name))
             {
@@ -94,7 +93,7 @@ namespace BaseApi.Controllers
         }
 
         [HttpGet("GetAll")]
-        public async Task<IActionResult> GetAll()
+        public virtual async Task<IActionResult> GetAll()
         {
             using (_logger.BeginScope("Request: {dataType}", _repo.GetType().Name))
             {

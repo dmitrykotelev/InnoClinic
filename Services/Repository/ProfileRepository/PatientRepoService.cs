@@ -25,5 +25,11 @@ namespace Middleware.Repository.ProfileRepository
             
             return response;
         }
+        public List<PatientDto> GetAll(IQueryable<Patient> query)
+        {
+            var response = _mapper.Map<List<PatientDto>>(_patientRepo.GetAll(query));
+
+            return response;
+        }
     }
 }

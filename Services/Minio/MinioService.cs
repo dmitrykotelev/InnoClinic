@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Middleware.Uploader;
 using Minio;
 using Minio.DataModel.Args;
 
 namespace Middleware.Minio
 {
-    public class MinioService
+    public class MinioService : IFileUploadService
     {
         private readonly IMinioClient _minioClient;
             
@@ -25,6 +26,13 @@ namespace Middleware.Minio
                 .WithStreamData(stream)
                 .WithObjectSize(stream.Length)
                 .WithContentType(file.ContentType);
+
+            bool bExists = await _minioClient.BucketExistsAsync(new BucketExistsArgs().WithBucket(bucketName));
+            if (!bExists)
+            {
+                await _minioClient.MakeBucketAsync(new MakeBucketArgs().WithBucket(bucketName));
+                Console.WriteLine($"=== Бакет '{bucketName}' был успешно создан в MinIO! ===");
+            }
 
             var response = await _minioClient.PutObjectAsync(putArgs);
 

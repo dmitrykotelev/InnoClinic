@@ -1,0 +1,291 @@
+/* --- Контейнер страницы профиля --- */
+.profile-page-container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+    color: #333333;
+}
+
+/* --- Заголовок и навигация --- */
+.profile-page-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.profile-page-header h2 {
+    margin: 0;
+    flex-grow: 1;
+    text-align: center;
+    color: #000000;
+}
+
+.btn-go-back {
+    background: none;
+    border: none;
+    color: #666666;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: color 0.2s;
+}
+
+.btn-go-back:hover {
+    color: #E30613; /* Фирменный красный Innowise */
+}
+
+/* --- Вкладки (Tabs) --- */
+.profile-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+.profile-tab-btn {
+    flex: 1;
+    padding: 12px 20px;
+    background-color: #f5f5f5;
+    color: #666666;
+    border: 1px solid #cccccc;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.profile-tab-btn:hover {
+    background-color: #e5e5e5;
+    color: #000000;
+}
+
+.profile-tab-btn.active {
+    background-color: #E30613; /* Красный активный цвет */
+    color: #ffffff;
+    border-color: #E30613;
+}
+
+/* --- Контент вкладок --- */
+.profile-content {
+    background-color: #ffffff;
+}
+
+/* --- Секция фото --- */
+.profile-photo-section {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.profile-photo-large {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #f5f5f5;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.profile-photo-placeholder {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background-color: #cccccc;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* --- Сетка данных (Data Grid) --- */
+.profile-details-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+
+@media (min-width: 600px) {
+    .profile-details-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.detail-item {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 6px;
+    border: 1px solid #eeeeee;
+    display: flex;
+    flex-direction: column;
+}
+
+.detail-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #999999;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.detail-value {
+    font-size: 18px;
+    color: #000000;
+    font-weight: 500;
+}
+
+/* --- Вкладка записей --- */
+.empty-appointments {
+    text-align: center;
+    padding: 50px 20px;
+    color: #666666;
+    background-color: #f5f5f5;
+    border-radius: 6px;
+    border: 1px dashed #cccccc;
+}
+
+/* --- Состояния загрузки и ошибки --- */
+.profile-loader, .profile-error-state {
+    text-align: center;
+    padding: 50px;
+    font-size: 18px;
+    color: #333333;
+}
+
+.profile-error-state h3 {
+    color: #E30613;
+    margin-bottom: 20px;
+}
+
+.btn-back-home {
+    padding: 10px 20px;
+    background-color: #333333;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-back-home:hover {
+    background-color: #000000;
+}
+
+/* --- Кнопки действий (Edit / Save / Cancel) --- */
+.profile-actions {
+    margin-top: 25px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-edit-profile {
+    padding: 10px 25px;
+    background-color: #333;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-edit-profile:hover {
+    background-color: #E30613; /* Ваш фирменный цвет */
+}
+
+/* --- Форма редактирования --- */
+.edit-profile-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 6px;
+    border: 1px solid #eeeeee;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.form-group input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: border-color 0.2s;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #666;
+}
+
+/* Ошибки валидации (F-2 - F-6) */
+.form-group input.input-error {
+    border-color: #E30613; /* Красный бордер */
+}
+
+.error-text {
+    color: #E30613;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+/* Подвал редактирования (AC-2) */
+.edit-actions-footer {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+.btn-save {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-save:disabled {
+    background-color: #a5d6a7;
+    cursor: not-allowed;
+}
+
+.btn-cancel {
+    padding: 10px 20px;
+    background-color: #fff;
+    color: #333;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-cancel:hover {
+    background-color: #f5f5f5;
+}
+
+/* Диалоговое окно (AC-6, AC-7) */
+.cancel-dialog p {
+    margin-bottom: 25px;
+    color: #666;
+}
