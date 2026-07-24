@@ -1,7 +1,7 @@
-const APPOINTMENTS_API_URL = 'http://gateway.inno-clinic.com/api-appointments/Appointments/Add';
+const APPOINTMENTS_API_URL = 'https://gateway.inno-clinic.com/api-appointments/Appointments/Add';
 // Предполагаемый эндпоинт для обновления. Проверь свой C# контроллер!
-const APPOINTMENTS_UPDATE_API_URL = 'http://gateway.inno-clinic.com/api-appointments/Appointments/Update'; 
-const PATIENT_PROFILE_API_URL = 'http://gateway.inno-clinic.com/api-profiles/Profile/Patient/GetByAccId';
+const APPOINTMENTS_UPDATE_API_URL = 'https://gateway.inno-clinic.com/api-appointments/Appointments/Update'; 
+const PATIENT_PROFILE_API_URL = 'https://gateway.inno-clinic.com/api-profiles/Profile/Patient/GetByAccId';
 
 const parseJwt = (token) => {
     try {

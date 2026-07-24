@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { CreateServiceModal } from './CreateServiceModal';
 import { CancelDialog } from '../CancelDialog';
 
-const API_BASE_SERVICES = 'http://gateway.inno-clinic.com/api-services';
+const API_BASE_SERVICES = 'https://gateway.inno-clinic.com/api-services';
 
 export const SpecializationDetails = ({ spec, categories, categoriesMap, onBack, onSelectService, onSpecUpdated, onSpecDeleted }) => {
     const [specServices, setSpecServices] = useState([]);

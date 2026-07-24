@@ -5,8 +5,8 @@ import { OfficesList } from './OfficesList';
 import { OfficeDetails } from './OfficeDetails';
 import { CreateOffice } from './CreateOffice';
 
-const API_BASE_OFFICES = 'http://gateway.inno-clinic.com/api-offices/Offices';
-const API_BASE_PHOTOS = 'http://gateway.inno-clinic.com/api-photos/Photo'; 
+const API_BASE_OFFICES = 'https://gateway.inno-clinic.com/api-offices/Offices';
+const API_BASE_PHOTOS = 'https://gateway.inno-clinic.com/api-photos/Photo'; 
 
 export const OfficesModule = ({ onBack }) => {
     const [offices, setOffices] = useState([]);

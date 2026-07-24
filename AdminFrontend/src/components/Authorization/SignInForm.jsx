@@ -16,7 +16,7 @@ const api = {
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
             body: params
-        }).catch(error => console.error("Login error:", error));
+        }).catch();
 
         if (response?.ok) {
             const data = await response.json().catch(() => ({}));

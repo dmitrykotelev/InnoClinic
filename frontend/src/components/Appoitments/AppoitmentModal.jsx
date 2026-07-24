@@ -1,17 +1,16 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import '../../styles/Global.css';
 
-const DOCTORS_API = 'http://gateway.inno-clinic.com/api-profiles/Profile/Doctor/GetAll'; 
-const SPECS_API = 'http://gateway.inno-clinic.com/api-services/Specializations/GetAllFiltered';
-const SPECS_API_NOFILTERS = 'http://gateway.inno-clinic.com/api-services/Specializations/GetAll';
-const SERVICES_API = 'http://gateway.inno-clinic.com/api-services/Services/GetAll';
-const OFFICES_API = 'http://gateway.inno-clinic.com/api-offices/Offices/GetAll';
-const CATEGORIES_API = 'http://gateway.inno-clinic.com/api-services/ServiceCategories/GetAll'; 
-const TIMESTAMPS_API = 'http://gateway.inno-clinic.com/api-appointments/Appointments/GetTimeStamps';
+const DOCTORS_API = 'https://gateway.inno-clinic.com/api-profiles/Profile/Doctor/GetAll'; 
+const SPECS_API = 'https://gateway.inno-clinic.com/api-services/Specializations/GetAllFiltered';
+const SPECS_API_NOFILTERS = 'https://gateway.inno-clinic.com/api-services/Specializations/GetAll';
+const SERVICES_API = 'https://gateway.inno-clinic.com/api-services/Services/GetAll';
+const OFFICES_API = 'https://gateway.inno-clinic.com/api-offices/Offices/GetAll';
+const CATEGORIES_API = 'https://gateway.inno-clinic.com/api-services/ServiceCategories/GetAll'; 
+const TIMESTAMPS_API = 'https://gateway.inno-clinic.com/api-appointments/Appointments/GetTimeStamps';
 
 const DEFAULT_OFFICE = [{ id: 'default-office-1', name: 'Main Clinic Office', isActive: true }];
 
-// Обновленный Combobox с поддержкой disabled
 const Combobox = ({ label, value, options, error, disabled, onChange, onSelect, onBlur, onFocus }) => {
     const [isOpen, setIsOpen] = useState(false);
 
@@ -52,7 +51,6 @@ export const AppointmentModal = ({
     const [internalIsOpen, setInternalIsOpen] = useState(false);
     const isModalOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
     
-    // AC-3: Блокируем поля, если мы в режиме Reschedule
     const isRescheduling = !!rescheduleData; 
 
     const [showExitDialog, setShowExitDialog] = useState(false);
@@ -115,7 +113,6 @@ export const AppointmentModal = ({
             const token = localStorage.getItem('accessToken');
             const authHeader = token ? { 'Authorization': `Bearer ${token}` } : {};
             
-            // Если режим редактирования, грузим все данные сразу, чтобы сопоставить ID
             Promise.all([
                 fetch(SPECS_API_NOFILTERS, { headers: authHeader }).then(r => r.json()).catch(() => []),
                 fetch(DOCTORS_API, { method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeader }, body: JSON.stringify([]) }).then(r => r.json()).catch(() => []),
@@ -128,7 +125,6 @@ export const AppointmentModal = ({
                 setCategories(catsList);
 
                 if (rescheduleData) {
-                    // AC-2: Предзаполняем поля
                     const tService = servsList.find(s => s.id === rescheduleData.serviceId || s.Id === rescheduleData.serviceId);
                     const tDoctor = docsList.find(d => d.id === rescheduleData.doctorId || d.Id === rescheduleData.doctorId);
                     const tSpec = specsList.find(s => String(s.id) === String(tService?.specializationId || tDoctor?.specializationId));
@@ -149,7 +145,6 @@ export const AppointmentModal = ({
                         doctor: tDoctor ? `${tDoctor.lastName} ${tDoctor.firstName}` : ''
                     });
 
-                    // Даем выбрать другого врача
                     setDoctors(docsList.filter(d => d.status === true || d.status === 'At work'));
                 } else {
                     fetchSpecificData('all', inputs, form);
@@ -164,7 +159,7 @@ export const AppointmentModal = ({
     }, [isModalOpen, rescheduleData]);
 
     const handleComboChange = (field, textValue) => {
-        if (isRescheduling && field !== 'doctor') return; // AC-3 Защита
+        if (isRescheduling && field !== 'doctor') return;
         let nextInputs = { ...inputs, [field]: textValue };
         const formField = field === 'spec' ? 'specialization' : field;
         let nextForm = { ...form, [formField]: null, date: '', time: '' };
@@ -191,9 +186,21 @@ export const AppointmentModal = ({
         const formField = field === 'spec' ? 'specialization' : field;
         let nextForm = { ...form, [formField]: item };
 
-        if (field === 'doctor' && item.officeId && !isRescheduling) {
-            const docOffice = offices.find(o => String(o.id) === String(item.officeId));
-            if (docOffice) nextForm.office = docOffice;
+        if (field === 'doctor' && !isRescheduling) {
+            if (item.officeId || item.OfficeId) {
+                const docOfficeId = item.officeId || item.OfficeId;
+                const docOffice = offices.find(o => String(o.id) === String(docOfficeId));
+                if (docOffice) nextForm.office = docOffice;
+            }
+
+            const specId = item.specializationId || item.SpecializationId;
+            if (specId) {
+                const docSpec = specializations.find(s => String(s.id) === String(specId));
+                if (docSpec) {
+                    nextForm.specialization = docSpec;
+                    nextInputs.spec = docSpec.name || docSpec.Name;
+                }
+            }
         }
 
         setInputs(nextInputs);
@@ -251,7 +258,6 @@ export const AppointmentModal = ({
         setErrors(newErrors);
     }, [form, inputs, touched]);
 
-    // AC-4: Disabled Confirm
     const isFormValid = () => form.specialization && form.doctor && form.service && form.office && form.date && form.time && Object.keys(errors).length === 0;
     const isDateTimeEnabled = !!(form.specialization && form.service && form.office);
 
@@ -261,8 +267,8 @@ export const AppointmentModal = ({
     };
 
     const handleCloseClick = () => setShowExitDialog(true);
-    const handleExitConfirm = () => { setShowExitDialog(false); closeHandler(); }; // AC-7
-    const handleExitCancel = () => setShowExitDialog(false); // AC-8
+    const handleExitConfirm = () => { setShowExitDialog(false); closeHandler(); };
+    const handleExitCancel = () => setShowExitDialog(false);
 
     const handleConfirmSubmit = () => {
         if (!isLoggedIn) {
@@ -311,7 +317,7 @@ export const AppointmentModal = ({
 
                                     <Combobox 
                                         label="Doctor"
-                                        disabled={false} /* AC-3: Доктор доступен */
+                                        disabled={false}
                                         value={inputs.doctor}
                                         options={doctors.map(d => ({...d, name: `${d.lastName} ${d.firstName}`}))}
                                         error={errors.doctor}
@@ -362,6 +368,8 @@ export const AppointmentModal = ({
                                             disabled={!isDateTimeEnabled}
                                             min={new Date().toISOString().split('T')[0]}
                                             value={form.date}
+                                            onClick={(e) => e.target.showPicker && e.target.showPicker()}
+                                            
                                             onChange={(e) => {
                                                 setForm(prev => ({ ...prev, date: e.target.value, time: '' }));
                                                 setErrors(prev => ({...prev, date: null})); 
@@ -412,7 +420,6 @@ export const AppointmentModal = ({
                 </div>
             )}
 
-            {/* AC-5, AC-6 */}
             {showExitDialog && (
                 <div className="modal-overlay top-tier">
                     <div className="modal-card sm">

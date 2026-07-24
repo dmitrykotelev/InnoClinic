@@ -4,15 +4,15 @@ import '../../../styles/Doctors.css';
 import '../../../styles/AppointmentModal.css';
 import { createAppointment } from '../../Appoitments/AppoitmentApi.js'; 
 
-const DOCTOR_API_URL = 'http://gateway.inno-clinic.com/api-profiles/Profile/Doctor'; 
-const SPECIALIZATIONS_API_URL = 'http://gateway.inno-clinic.com/api-services/Specializations'; 
-const SERVICES_API_URL = 'http://gateway.inno-clinic.com/api-services/Services'; 
-const OFFICES_API_URL = 'http://gateway.inno-clinic.com/api-offices/Offices'; 
-const AUTH_API_URL = 'http://gateway.inno-clinic.com/api-identity/Profile'; 
-const PHOTOS_API_URL = 'http://gateway.inno-clinic.com/api-photos/Photo'; 
+const DOCTOR_API_URL = 'https://gateway.inno-clinic.com/api-profiles/Profile/Doctor'; 
+const SPECIALIZATIONS_API_URL = 'https://gateway.inno-clinic.com/api-services/Specializations'; 
+const SERVICES_API_URL = 'https://gateway.inno-clinic.com/api-services/Services'; 
+const OFFICES_API_URL = 'https://gateway.inno-clinic.com/api-offices/Offices'; 
+const AUTH_API_URL = 'https://gateway.inno-clinic.com/api-identity/Profile'; 
+const PHOTOS_API_URL = 'https://gateway.inno-clinic.com/api-photos/Photo'; 
 
-const CATEGORIES_API = 'http://gateway.inno-clinic.com/api-services/ServiceCategories/GetAll'; 
-const TIMESTAMPS_API = 'http://gateway.inno-clinic.com/api-appointments/Appointments/GetTimeStamps';
+const CATEGORIES_API = 'https://gateway.inno-clinic.com/api-services/ServiceCategories/GetAll'; 
+const TIMESTAMPS_API = 'https://gateway.inno-clinic.com/api-appointments/Appointments/GetTimeStamps';
 
 export const DoctorProfile = () => {
     const { id } = useParams(); 
@@ -350,7 +350,7 @@ const PrefilledAppointmentModal = ({ doctorData, onClose, onSaveAppointment }) =
 
     return (
         <div className="modal-overlay">
-            <div className="appointment-modal">
+            <div className="modal-card md">
                 <div className="modal-header">
                     <h2>Create Appointment</h2>
                     <button className="btn-close" onClick={() => setShowExitDialog(true)}>&times;</button>
@@ -404,6 +404,7 @@ const PrefilledAppointmentModal = ({ doctorData, onClose, onSaveAppointment }) =
                                     disabled={!isDateTimeEnabled}
                                     min={new Date().toISOString().split('T')[0]}
                                     value={form.date}
+                                    onClick={(e) => e.target.showPicker && e.target.showPicker()}
                                     onChange={(e) => {
                                         setForm(prev => ({ ...prev, date: e.target.value, time: '' }));
                                         setErrors(prev => ({...prev, date: null})); 
@@ -453,7 +454,7 @@ const PrefilledAppointmentModal = ({ doctorData, onClose, onSaveAppointment }) =
 
                 <div className="modal-footer">
                     <button 
-                        className="btn-confirm" 
+                        className="btn btn-primary" 
                         disabled={!isFormValid() || isLoadingData} 
                         onClick={handleConfirmSubmit}
                     >
@@ -463,12 +464,13 @@ const PrefilledAppointmentModal = ({ doctorData, onClose, onSaveAppointment }) =
             </div>
 
             {showExitDialog && (
-                <div className="modal-overlay dialog-overlay">
-                    <div className="dialog-modal">
-                        <p>Do you really want to exit? Your appointment will not be saved.</p>
-                        <div className="dialog-actions">
-                            <button className="btn-yes" onClick={onClose}>Yes</button>
-                            <button className="btn-no" onClick={() => setShowExitDialog(false)}>No</button>
+                <div className="modal-overlay top-tier">
+                    <div className="modal-card sm">
+                        <h3 className="mb-3">Cancel Edit?</h3>
+                        <p className="mb-4">Do you really want to exit? Your appointment will not be saved.</p>
+                        <div className="flex-row" style={{justifyContent: 'center'}}>
+                            <button className="btn btn-primary" onClick={onClose}>Yes</button>
+                            <button className="btn btn-secondary" onClick={() => setShowExitDialog(false)}>No</button>
                         </div>
                     </div>
                 </div>
@@ -485,7 +487,7 @@ const Combobox = ({ label, value, options, error, onChange, onSelect, onBlur, on
             <label>{label}</label>
             <input 
                 type="text"
-                className={`form-control ${error ? 'is-invalid' : ''} ${disabled ? 'disabled-input' : ''}`}
+                className={`form-control ${error ? 'is-invalid' : ''}`}
                 value={value}
                 disabled={disabled}
                 onChange={(e) => { onChange(e.target.value); setIsOpen(true); }}
@@ -496,7 +498,6 @@ const Combobox = ({ label, value, options, error, onChange, onSelect, onBlur, on
                 }}
                 onBlur={() => { setTimeout(() => { setIsOpen(false); if(onBlur) onBlur(); }, 150); }}
                 placeholder={disabled ? "" : `Start typing ${label.toLowerCase()}...`}
-                style={disabled ? { backgroundColor: '#f5f5f5', color: '#666', cursor: 'not-allowed' } : {}}
             />
             {isOpen && !disabled && options.length > 0 && (
                 <ul className="combo-dropdown">

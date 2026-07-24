@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import '../../../styles/Global.css';
 
-const PATIENTS_API = 'http://gateway.inno-clinic.com/api-profiles/Profile/Patient/GetAll';
-const DOCTORS_API = 'http://gateway.inno-clinic.com/api-profiles/Profile/Doctor/GetAll'; 
-const SPECS_API = 'http://gateway.inno-clinic.com/api-services/Specializations/GetAllFiltered';
-const SPECS_API_NOFILTERS = 'http://gateway.inno-clinic.com/api-services/Specializations/GetAll';
-const SERVICES_API = 'http://gateway.inno-clinic.com/api-services/Services/GetAll';
+const PATIENTS_API = 'https://gateway.inno-clinic.com/api-profiles/Profile/Patient/GetAll';
+const DOCTORS_API = 'https://gateway.inno-clinic.com/api-profiles/Profile/Doctor/GetAll'; 
+const SPECS_API = 'https://gateway.inno-clinic.com/api-services/Specializations/GetAllFiltered';
+const SPECS_API_NOFILTERS = 'https://gateway.inno-clinic.com/api-services/Specializations/GetAll';
+const SERVICES_API = 'https://gateway.inno-clinic.com/api-services/Services/GetAll';
 
-const OFFICES_API = 'http://gateway.inno-clinic.com/api-offices/Offices/GetAll';
-const CATEGORIES_API = 'http://gateway.inno-clinic.com/api-services/ServiceCategories/GetAll'; 
-const TIMESTAMPS_API = 'http://gateway.inno-clinic.com/api-appointments/Appointments/GetTimeStamps';
+const OFFICES_API = 'https://gateway.inno-clinic.com/api-offices/Offices/GetAll';
+const CATEGORIES_API = 'https://gateway.inno-clinic.com/api-services/ServiceCategories/GetAll'; 
+const TIMESTAMPS_API = 'https://gateway.inno-clinic.com/api-appointments/Appointments/GetTimeStamps';
 
 const DEFAULT_OFFICE = [{
     id: 'default-office-1',

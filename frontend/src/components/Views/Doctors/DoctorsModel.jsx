@@ -3,8 +3,8 @@ import { fetchDoctors } from './api';
 import { DoctorsView } from './DoctorsView';
 import '../../../styles/Global.css'; 
 
-const OFFICES_API_DOMAIN = 'http://gateway.inno-clinic.com/api-offices';
-const SPECS_API_DOMAIN = 'http://gateway.inno-clinic.com/api-services';
+const OFFICES_API_DOMAIN = 'https://gateway.inno-clinic.com/api-offices';
+const SPECS_API_DOMAIN = 'https://gateway.inno-clinic.com/api-services';
 
 export const DoctorsModule = ({ onBack }) => {
     const [doctors, setDoctors] = useState([]);
@@ -121,16 +121,16 @@ export const DoctorsModule = ({ onBack }) => {
             </div>
 
             <DoctorsView
-                doctors={filteredDoctors} 
-                specializations={specializationsForView}
-                offices={officeAddressesForView} 
-                searchQuery={searchQuery}
-                selectedSpec={selectedSpec}
-                selectedOffice={selectedOffice}
-                onSearchChange={setSearchQuery}
-                onSpecChange={setSelectedSpec}
-                onOfficeChange={setSelectedOffice}
-            />
+            doctors={filteredDoctors} 
+            specializations={specializationsForView}
+            offices={officeAddressesForView} 
+            searchQuery={searchQuery}
+            selectedSpec={selectedSpec}
+            selectedOffice={selectedOffice}
+            setSearchQuery={setSearchQuery} 
+            setSelectedSpec={setSelectedSpec} 
+            setSelectedOffice={setSelectedOffice} 
+        />
         </div>
     );
 };

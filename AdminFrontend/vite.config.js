@@ -10,7 +10,7 @@ export default defineConfig({
         'my-custom-domain.local', 
         'test-project.com',
         '.ngrok-free.app',
-        'inno-clinic.admin.portal.com'
+        'admin.inno-clinic.com'
     ],
     port: 4010, 
   }

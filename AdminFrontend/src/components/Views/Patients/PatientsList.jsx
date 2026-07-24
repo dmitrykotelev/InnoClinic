@@ -5,7 +5,6 @@ export const PatientsList = ({ patients, onBack, onSelectPatient, onCreatePatien
     const [deletingId, setDeletingId] = useState(null);
     const [isSearchFocused, setIsSearchFocused] = useState(false);
 
-    // Фильтрация пациентов по полному имени
     const filteredPatients = useMemo(() => {
         if (!searchTerm.trim()) return patients;
         const lowerSearch = searchTerm.toLowerCase();
@@ -39,7 +38,6 @@ export const PatientsList = ({ patients, onBack, onSelectPatient, onCreatePatien
             </div>
 
             <div className="flex-between mb-4">
-                {/* AC-3: Умный поиск (Combobox) */}
                 <div style={{ position: 'relative', width: '100%', maxWidth: '350px' }}>
                     <input 
                         type="text" 
@@ -68,7 +66,6 @@ export const PatientsList = ({ patients, onBack, onSelectPatient, onCreatePatien
                     )}
                 </div>
 
-                {/* AC-4: Кнопка создания */}
                 <button className="btn btn-primary" onClick={onCreatePatient}>
                     ➕ Create patient
                 </button>
@@ -84,7 +81,7 @@ export const PatientsList = ({ patients, onBack, onSelectPatient, onCreatePatien
                                 <tr>
                                     <th>Full Name</th>
                                     <th>Phone Number</th>
-                                    <th style={{ textAlign: 'right' }}>Actions</th>
+                                    <th style={{ textAlign: 'center' }}>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -97,7 +94,6 @@ export const PatientsList = ({ patients, onBack, onSelectPatient, onCreatePatien
                                             <td style={{ fontWeight: '500' }}>{fullName}</td>
                                             <td>{phone}</td>
                                             <td style={{ textAlign: 'right' }}>
-                                                {/* AC-5: Кнопка Delete */}
                                                 <button 
                                                     className="btn btn-secondary btn-sm" 
                                                     onClick={(e) => handleDeleteClick(e, p.id ?? p.Id)}

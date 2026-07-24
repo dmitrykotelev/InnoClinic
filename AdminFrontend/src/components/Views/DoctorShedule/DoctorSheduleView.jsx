@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import '../../../styles/Global.css'; 
 
-const API_BASE_APPOINTMENTS = 'http://gateway.inno-clinic.com/api-appointments/Appointments';
-const API_BASE_PATIENTS = 'http://gateway.inno-clinic.com/api-profiles/Profile/Patient';
-const API_BASE_SERVICES = 'http://gateway.inno-clinic.com/api-services/Services/GetAll'; 
+const API_BASE_APPOINTMENTS = 'https://gateway.inno-clinic.com/api-appointments/Appointments';
+const API_BASE_PATIENTS = 'https://gateway.inno-clinic.com/api-profiles/Profile/Patient';
+const API_BASE_SERVICES = 'https://gateway.inno-clinic.com/api-services/Services/GetAll'; 
 
 export const DoctorScheduleView = ({ profileData, onBack, onNavigateToPatient, onNavigateToResult }) => {
     const today = new Date().toISOString().split('T')[0];

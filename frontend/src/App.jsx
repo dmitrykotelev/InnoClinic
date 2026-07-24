@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation, useParams } from 'react-router-dom';
 import Authorization from "./components/Authorization/Authorization.jsx";
 
-// ИМПОРТ НОВОГО МОДУЛЯ ВРАЧЕЙ ДЛЯ ПАЦИЕНТА:
 import { PatientDoctorsModule } from "./components/Views/Doctors/PatientDoctorsModule.jsx";
 
 import { ServicesModule } from "./components/Views/Services/ServicesModule.jsx";
@@ -13,14 +12,13 @@ import { DoctorProfile } from './components/Profile/Doctor/DoctorProfile.jsx';
 import { AppointmentModal } from './components/Appoitments/AppoitmentModal.jsx';
 import { createAppointment } from './components/Appoitments/AppoitmentApi.js';
 
-// ДОБАВЛЕН ИМПОРТ ПРОСМОТРА РЕЗУЛЬТАТОВ:
 import { MedicalResultView } from './components/Views/MedicalResults/MedicalResultView.jsx';
 
 import './styles/Doctors.css';
 import './styles/App.css';
 
-const API_BASE_URL = 'http://gateway.inno-clinic.com/api-identity';
-const PROFILES_API_URL = 'http://gateway.inno-clinic.com/api-profiles';
+const API_BASE_URL = 'https://gateway.inno-clinic.com/api-identity';
+const PROFILES_API_URL = 'https://gateway.inno-clinic.com/api-profiles';
 
 const MainApp = () => {
     const navigate = useNavigate();
@@ -80,7 +78,12 @@ const MainApp = () => {
                 if (profileRes.ok) {
                     const profileData = await profileRes.json();
                     
-                    setCurrentUser(userInfo);
+                    setCurrentUser({
+                        ...userInfo,
+                        firstName: profileData.firestName || profileData.firstName, 
+                        lastName: profileData.lastName
+                    });
+                    
                     setIsLoggedIn(true);
                     localStorage.setItem('accessToken', token); 
                     
@@ -201,7 +204,6 @@ const MainApp = () => {
                 {currentView === 'main' && (
                     <div className="main-dashboard">
                         <h2>Welcome to the Clinic Dashboard</h2>
-                        {isLoggedIn && <p>Welcome, {currentUser?.given_name || currentUser?.UserName || "User"}!</p>}
                     </div>
                 )}
             </main>
@@ -217,17 +219,14 @@ const parseJwt = (token) => {
         const base64Url = token.split('.')[1];
         if (!base64Url) return null;
 
-        // Заменяем символы на стандартные для Base64
         let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
         
-        // Магия: добавляем знаки "=", чтобы длина строки делилась на 4
         const pad = base64.length % 4;
         if (pad) {
             if (pad === 1) throw new Error('Invalid Base64 length');
             base64 += new Array(5 - pad).join('=');
         }
 
-        // Декодируем
         const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
             return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
         }).join(''));
@@ -242,7 +241,6 @@ const parseJwt = (token) => {
 const PatientProfileWrapper = () => {
     const navigate = useNavigate();
     
-    // Достаем токен и расшифровываем ID пациента (AccountId)
     const token = localStorage.getItem('accessToken');
     const decodedToken = token ? parseJwt(token) : null;
     const currentUserId = decodedToken?.sub 
@@ -251,7 +249,7 @@ const PatientProfileWrapper = () => {
 
     return (
         <PatientProfile 
-            patientId={currentUserId} // <-- Теперь передаем ID!
+            patientId={currentUserId}
             onBack={() => navigate('/')} 
             onViewResult={(appId) => navigate(`/result/${appId}`)} 
         />
@@ -261,7 +259,6 @@ const PatientProfileWrapper = () => {
 const DoctorRouteWrapper = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    // Возвращаемся на предыдущую страницу (доктор может быть открыт откуда угодно)
     return <DoctorProfile doctorId={id} userRole="Patient" onBack={() => navigate(-1)} />;
 };
 
@@ -287,7 +284,6 @@ function App() {
                 <Route path="/" element={<MainApp />} />
                 <Route path="/create-profile" element={<PatientProfileCreation />} />
                 
-                {/* Подключаем наши обертки */}
                 <Route path="/profile" element={<PatientProfileWrapper />} />
                 <Route path="/doctor/:id" element={<DoctorRouteWrapper />} />
                 <Route path="/result/:id" element={<MedicalResultRouteWrapper />} />

@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { CancelDialog } from '../CancelDialog';
 
-const API_BASE_PROFILES = 'http://gateway.inno-clinic.com/api-profiles/Profile/Patient';
-const API_BASE_PHOTOS = 'http://gateway.inno-clinic.com/api-photos/Photo';
-const API_BASE_IDENTITY = 'http://gateway.inno-clinic.com/api-identity/Profile';
+const API_BASE_PROFILES = 'https://gateway.inno-clinic.com/api-profiles/Profile/Patient';
+const API_BASE_PHOTOS = 'https://gateway.inno-clinic.com/api-photos/Photo';
+const API_BASE_IDENTITY = 'https://gateway.inno-clinic.com/api-identity/Profile';
 
 export const PatientDetails = ({ patient, onBack, onUpdated }) => {
     const [isEditing, setIsEditing] = useState(false);

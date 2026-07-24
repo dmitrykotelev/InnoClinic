@@ -200,11 +200,62 @@ body {
     flex-direction: column;
 }
 
+.form-control:disabled,
+.filter-control:disabled {
+    background-color: var(--border-light); /* Делаем фон слегка серым для контраста */
+    color: var(--text-muted); /* Делаем текст темно-серым и читаемым */
+    cursor: not-allowed; /* Курсор запрета */
+    border-color: var(--border-color);
+    
+    /* Фиксы для Apple Safari / iOS, чтобы текст не исчезал и не становился белым/прозрачным */
+    opacity: 1; 
+    -webkit-text-fill-color: var(--text-muted); 
+    -webkit-opacity: 1;
+}
+
+/* Слегка затемняем заблокированные выпадающие списки для наглядности */
+select.form-control:disabled {
+    background-color: var(--bg-page);
+}
+
 .form-group label {
     margin-bottom: 6px;
     font-weight: 500;
     color: var(--text-main);
     font-size: 14px;
+}
+
+input[type="date"].form-control {
+    position: relative;
+    font-family: inherit;
+    color: var(--text-main);
+    cursor: pointer;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    background-color: transparent;
+    padding: 5px;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    opacity: 0.6;
+    transition: all 0.2s ease;
+    width: 20px;
+    height: 20px;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+    background-color: var(--bg-page);
+    /* Фильтр перекрашивает иконку в твой красный цвет */
+    filter: invert(16%) sepia(85%) saturate(6012%) hue-rotate(349deg) brightness(96%) contrast(106%);
+}
+
+input[type="date"]:invalid::-webkit-datetime-edit {
+    color: var(--text-muted);
+}
+
+input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+    cursor: pointer;
 }
 
 .form-control {
@@ -250,7 +301,51 @@ body {
 }
 .combo-dropdown li { padding: 10px; cursor: pointer; }
 .combo-dropdown li:hover { background-color: var(--bg-page); }
+/* =========================================
+   DATE INPUT STYLES (Нативные календари)
+   ========================================= */
 
+/* Делаем так, чтобы текст даты и плейсхолдер смотрелись аккуратно */
+input[type="date"].form-control {
+    position: relative;
+    font-family: inherit;
+    color: var(--text-main);
+    /* На iOS убираем дефолтное скругление и тени Apple */
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+}
+
+/* Стилизуем саму иконку календарика (работает в Chrome, Edge, Safari) */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    background-color: transparent;
+    padding: 5px;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    opacity: 0.6;
+    transition: all 0.2s ease;
+    /* Увеличиваем кликабельную зону */
+    width: 20px;
+    height: 20px;
+}
+
+/* Эффект при наведении на иконку календаря */
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+    background-color: var(--bg-page);
+    /* CSS-фильтр, который красит стандартную черную иконку в твой красный цвет (--innowise-red) */
+    filter: invert(16%) sepia(85%) saturate(6012%) hue-rotate(349deg) brightness(96%) contrast(106%);
+}
+
+/* Если дата не выбрана (пустая), делаем текст серым как плейсхолдер */
+input[type="date"]:invalid::-webkit-datetime-edit {
+    color: var(--text-muted);
+}
+
+/* Делаем кликабельным всё поле, а не только иконку */
+input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+    cursor: pointer;
+}
 /* =========================================
    5. MODALS & OVERLAYS
    ========================================= */

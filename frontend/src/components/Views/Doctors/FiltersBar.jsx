@@ -19,17 +19,19 @@ export const FiltersBar = ({
             value={selectedSpec}
             onChange={(e) => setSelectedSpec(e.target.value)}
         >
-            <option value="">Specializations</option>
+            <option value="">Any Specialization</option>
             {specializations.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
+        
         <select
             className="filter-select"
             value={selectedOffice}
             onChange={(e) => setSelectedOffice(e.target.value)}
         >
-            <option value="">Offices</option>
+            <option value="">Any Office</option>
             {offices.map(o => <option key={o} value={o}>{o}</option>)}
         </select>
+        
         <button
             onClick={() => setViewMap(!viewMap)}
             className={`btn-map-toggle ${viewMap ? 'active' : 'inactive'}`}

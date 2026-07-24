@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation, useParams } from 'react-router-dom'; 
 import Authorization from "./components/Authorization/Authorization.jsx";
 
-// ВЕРНУЛИ ОРИГИНАЛЬНЫЙ АДМИНСКИЙ МОДУЛЬ ДОКТОРОВ:
 import { DoctorsModule } from "./components/Views/Doctors/DoctorsModel.jsx"; 
 import { createAppointment } from './components/Views/Appointments/AppoitmentApi.js';
 
@@ -19,8 +18,8 @@ import { ReceptionistsModule } from './components/Views/Receptions/Receptionists
 import { PatientsModule } from './components/Views/Patients/PatientsModule.jsx';
 import { AppointmentsModule } from './components/Views/Appointments/AppointmentsModule.jsx';
 
-const API_BASE_URL = 'http://gateway.inno-clinic.com/api-identity';
-const PROFILES_API_URL = 'http://gateway.inno-clinic.com/api-profiles'; // Без слэша на конце!
+const API_BASE_URL = 'https://gateway.inno-clinic.com/api-identity';
+const PROFILES_API_URL = 'https://gateway.inno-clinic.com/api-profiles';
 
 const parseJwt = (token) => {
     try {
@@ -109,7 +108,6 @@ const MainApp = () => {
             const decodedToken = parseJwt(token);
             if (!decodedToken) throw new Error("Неверный формат токена авторизации");
 
-            // ИСПРАВЛЕНИЕ: Умный поиск роли (.NET Identity может прятать её по длинному URI)
             const tokenRole = decodedToken.role || decodedToken.Role || decodedToken["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
             const activeRole = Array.isArray(tokenRole) ? tokenRole[0] : tokenRole;
 
@@ -119,7 +117,6 @@ const MainApp = () => {
             } else if (activeRole === "receptionist") {
                 profileEndpoint = `${PROFILES_API_URL}/ReceptionAuthorize/me`;
             } else {
-                // Если зашел пациент или роль не прочиталась — явно кидаем ошибку
                 throw new Error(`У вас нет доступа к панели администратора. Ваша роль: ${activeRole || 'не найдена'}`);
             }
 
@@ -150,7 +147,6 @@ const MainApp = () => {
             }
         } catch (error) {
             console.error("Ошибка сессии:", error);
-            // ТЕПЕРЬ ОШИБКА НЕ СБРАСЫВАЕТСЯ МОЛЧА, А ВЫВОДИТСЯ НА ЭКРАН:
             setAccessError(error.message); 
             clearSessionState();
         } finally {
@@ -207,7 +203,7 @@ const MainApp = () => {
                         onClick={() => {
                             clearSessionState();
                             setAccessError(null);
-                            setForceAuthOpen(true); // Даем возможность перелогиниться
+                            setForceAuthOpen(true);
                         }} 
                         style={{ backgroundColor: '#ff4d4f', color: 'white', border: 'none', padding: '10px 20px', cursor: 'pointer' }}
                     >

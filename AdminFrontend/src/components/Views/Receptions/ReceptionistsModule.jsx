@@ -5,10 +5,10 @@ import { ReceptionistsList } from './ReceptionistsList';
 import { ReceptionistDetails } from './ReceptionistDetails';
 import { CreateReceptionistModal } from './CreateReceptionistModal';
 
-const API_BASE_PROFILES = 'http://gateway.inno-clinic.com/api-profiles/Profile/Reception';
-const API_BASE_OFFICES = 'http://gateway.inno-clinic.com/api-offices/Offices';
-const API_BASE_PHOTOS = 'http://gateway.inno-clinic.com/api-photos/Photo';
-const API_BASE_ACCOUNTS = 'http://gateway.inno-clinic.com/api-identity/Profile'; 
+const API_BASE_PROFILES = 'https://gateway.inno-clinic.com/api-profiles/Profile/Reception';
+const API_BASE_OFFICES = 'https://gateway.inno-clinic.com/api-offices/Offices';
+const API_BASE_PHOTOS = 'https://gateway.inno-clinic.com/api-photos/Photo';
+const API_BASE_ACCOUNTS = 'https://gateway.inno-clinic.com/api-identity/Profile'; 
 
 export const ReceptionistsModule = ({ onBack }) => {
     const [receptionists, setReceptionists] = useState([]);

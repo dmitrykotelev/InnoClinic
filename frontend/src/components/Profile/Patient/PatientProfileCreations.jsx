@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import '../../../styles/Global.css';
 
-const PATIENT_API_URL = 'http://gateway.inno-clinic.com/api-profiles/Profile/Patient'; 
-const DOCUMENTS_API_URL = 'http://gateway.inno-clinic.com/api-photos/Photo'; 
-const IDENTITY_API_URL = 'http://gateway.inno-clinic.com/api-identity/Profile'; 
+const PATIENT_API_URL = 'https://gateway.inno-clinic.com/api-profiles/Profile/Patient'; 
+const DOCUMENTS_API_URL = 'https://gateway.inno-clinic.com/api-photos/Photo'; 
+const IDENTITY_API_URL = 'https://gateway.inno-clinic.com/api-identity/Profile'; 
 
 const parseJwt = (token) => {
     try {
@@ -450,6 +450,8 @@ export const PatientProfileCreation = () => {
                         value={formData.dateOfBirth} 
                         onChange={handleChange} 
                         onBlur={handleBlur}
+
+                        onClick={(e) => e.target.showPicker && e.target.showPicker()}
                         className={`form-control ${errors.dateOfBirth ? 'is-invalid' : ''}`}
                     />
                     {errors.dateOfBirth && <span className="error-msg">{errors.dateOfBirth}</span>}

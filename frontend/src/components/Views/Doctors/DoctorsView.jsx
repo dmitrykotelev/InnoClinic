@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import '../../../styles/Doctors.css';
 
-import { Header } from "../Header";
-import { FiltersBar } from "../FiltersBar";
-import { MapView } from "../MapView";
+import { Header } from "./Header";
+import { FiltersBar } from "./FiltersBar";
+import { MapView } from "./MapView";
 import { DoctorsList } from "./DoctorsList";
 
 export const DoctorsView = (props) => {

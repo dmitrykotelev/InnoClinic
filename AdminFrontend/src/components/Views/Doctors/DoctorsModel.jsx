@@ -3,10 +3,10 @@ import { fetchDoctors } from './api';
 import { DoctorsView } from './DoctorsView';
 import { CreateDoctorModal } from './CreateDoctorModal';
 
-const OFFICES_API_DOMAIN = 'http://gateway.inno-clinic.com/api-offices';
-const SPECS_API_DOMAIN = 'http://gateway.inno-clinic.com/api-services';
-const DOCTORS_API_DOMAIN = 'http://gateway.inno-clinic.com/api-profiles'; 
-const IDENTITY_API_DOMAIN = 'http://gateway.inno-clinic.com/api-identity';
+const OFFICES_API_DOMAIN = 'https://gateway.inno-clinic.com/api-offices';
+const SPECS_API_DOMAIN = 'https://gateway.inno-clinic.com/api-services';
+const DOCTORS_API_DOMAIN = 'https://gateway.inno-clinic.com/api-profiles'; 
+const IDENTITY_API_DOMAIN = 'https://gateway.inno-clinic.com/api-identity';
 const DOCUMENTS_API_DOMAIN = 'http://documents.inno-clinic.com';
 
 export const DoctorsModule = ({ onBack, userRole = 'Receptionist' }) => {
@@ -107,11 +107,8 @@ export const DoctorsModule = ({ onBack, userRole = 'Receptionist' }) => {
 
     const handleDeleteDoctor = async (doctorId, accountId) => {
     try {
-        // Достаем токен оттуда, где ты его хранишь после логина
-        // Например, из localStorage:
         const token = localStorage.getItem('accessToken'); 
 
-        // Создаем стандартный объект заголовков
         const authHeaders = {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -120,11 +117,11 @@ export const DoctorsModule = ({ onBack, userRole = 'Receptionist' }) => {
         const [profileResponse, accountResponse] = await Promise.all([
             fetch(`${DOCTORS_API_DOMAIN}/Profile/Doctor/${doctorId}`, {
                 method: 'DELETE',
-                headers: authHeaders // <-- ПЕРЕДАЕМ ТОКЕН СЮДА
+                headers: authHeaders 
             }),
             fetch(`${IDENTITY_API_DOMAIN}/Profile/${accountId}`, { 
                 method: 'DELETE',
-                headers: authHeaders // <-- И СЮДА
+                headers: authHeaders 
             })
         ]);
 

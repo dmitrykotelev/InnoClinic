@@ -39,7 +39,7 @@ export const ReceptionistsList = ({ receptionists, officesMap, onBack, onSelectR
                                 <tr>
                                     <th>Full Name</th>
                                     <th>Office Address</th>
-                                    <th style={{ textAlign: 'right' }}>Actions</th>
+                                    <th style={{ textAlign: 'left' }}>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>

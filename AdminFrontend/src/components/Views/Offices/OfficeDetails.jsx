@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { CancelDialog } from '../CancelDialog';
 
-const API_BASE_OFFICES = 'http://gateway.inno-clinic.com/api-offices/Offices';
-const API_BASE_PHOTOS = 'http://gateway.inno-clinic.com/api-photos/Photo';
+const API_BASE_OFFICES = 'https://gateway.inno-clinic.com/api-offices/Offices';
+const API_BASE_PHOTOS = 'https://gateway.inno-clinic.com/api-photos/Photo';
 
 export const OfficeDetails = ({ office, onBack, onOfficeUpdated, onOfficeDeleted }) => {
     const [isEditing, setIsEditing] = useState(false);

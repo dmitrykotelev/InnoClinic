@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import '../../../styles/Global.css';
 
-const API_BASE_URL = 'http://gateway.inno-clinic.com/api-profiles';
-const DOCUMENTS_API_URL = 'http://gateway.inno-clinic.com/api-photos'; 
-const IDENTITY_API_URL = 'http://gateway.inno-clinic.com/api-identity'; 
-const API_BASE_APPOINTMENTS = 'http://gateway.inno-clinic.com/api-appointments/Appointments';
-const API_BASE_DOCTORS = 'http://gateway.inno-clinic.com/api-profiles/Profile/Doctor';
-const API_BASE_SERVICES = 'http://gateway.inno-clinic.com/api-services/Services/GetAll';
+const API_BASE_URL = 'https://gateway.inno-clinic.com/api-profiles';
+const DOCUMENTS_API_URL = 'https://gateway.inno-clinic.com/api-photos'; 
+const IDENTITY_API_URL = 'https://gateway.inno-clinic.com/api-identity'; 
+const API_BASE_APPOINTMENTS = 'https://gateway.inno-clinic.com/api-appointments/Appointments';
+const API_BASE_DOCTORS = 'https://gateway.inno-clinic.com/api-profiles/Profile/Doctor';
+const API_BASE_SERVICES = 'https://gateway.inno-clinic.com/api-services/Services/GetAll';
 
 // ==========================================
 // 1. КОМПОНЕНТ ЛИЧНЫХ ДАННЫХ

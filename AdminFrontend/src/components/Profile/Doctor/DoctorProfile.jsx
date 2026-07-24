@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import '../../../styles/Global.css';
 
-const DOCTOR_API_URL = 'http://gateway.inno-clinic.com/api-profiles/Profile/Doctor'; 
-const SPECIALIZATIONS_API_URL = 'http://gateway.inno-clinic.com/api-services/Specializations'; 
-const OFFICES_API_URL = 'http://gateway.inno-clinic.com/api-offices/Offices'; 
-const AUTH_API_URL = 'http://gateway.inno-clinic.com/api-identity/Profile'; 
-const PHOTOS_API_URL = 'http://gateway.inno-clinic.com/api-photos/Photo'; 
+const DOCTOR_API_URL = 'https://gateway.inno-clinic.com/api-profiles/Profile/Doctor'; 
+const SPECIALIZATIONS_API_URL = 'https://gateway.inno-clinic.com/api-services/Specializations'; 
+const OFFICES_API_URL = 'https://gateway.inno-clinic.com/api-offices/Offices'; 
+const AUTH_API_URL = 'https://gateway.inno-clinic.com/api-identity/Profile'; 
+const PHOTOS_API_URL = 'https://gateway.inno-clinic.com/api-photos/Photo'; 
 
 // Функция для безопасного декодирования JWT-токена на клиенте
 const parseJwt = (token) => {
@@ -47,21 +47,17 @@ export const DoctorProfile = ({ doctorId, userRole, onBack }) => {
 
             let requestUrl = '';
 
-            // РАЗДЕЛЕНИЕ ЛОГИКИ ЗАПРОСА
             if (doctorId && doctorId !== 'me') {
-                // Если doctorId содержит дефисы (значит это длинный GUID AccountId)
                 if (String(doctorId).includes('-')) {
                     requestUrl = `${DOCTOR_API_URL}/GetByAccId/${doctorId}`;
                 } else {
-                    // Иначе это обычный числовой ID доктора (например, 1006)
                     requestUrl = `${DOCTOR_API_URL}/${doctorId}`;
                 }
             } else {
-                // Вариант Б: Смотрим свой профиль — достаем AccountId (sub) из токена
                 if (!token) throw new Error('Сессия истекла. Пожалуйста, войдите заново.');
                 
                 const decodedToken = parseJwt(token);
-                const accId = decodedToken?.sub; // В claim 'sub' хранится Id аккаунта
+                const accId = decodedToken?.sub;
                 
                 if (!accId) throw new Error('Не удалось определить ID аккаунта из токена.');
                 
@@ -72,7 +68,6 @@ export const DoctorProfile = ({ doctorId, userRole, onBack }) => {
             if (!doctorResponse.ok) throw new Error('Doctor not found');
             const doctorData = await doctorResponse.json();
 
-            // Дальнейший сбор связанных данных (специализации, офисы, фото)...
             try {
                 const specResponse = await fetch(`${SPECIALIZATIONS_API_URL}/${doctorData.specializationId}`, { headers: authHeader });
                 if (specResponse.ok) {
@@ -118,7 +113,6 @@ export const DoctorProfile = ({ doctorId, userRole, onBack }) => {
     }, [doctorId]);
 
     useEffect(() => {
-        // КОРРЕКТИРОВКА СТАРТОВОГО ВАРНИНГА
         const token = localStorage.getItem('accessToken');
         if (!doctorId && !token) {
             setError("Doctor ID is missing and no active session found.");
@@ -322,7 +316,6 @@ export const DoctorProfile = ({ doctorId, userRole, onBack }) => {
 
     return (
         <div className="page-container">
-            {/* Рендеринг JSX формы остался без изменений */}
             <div className="flex-between mb-4">
                 <div className="flex-row">
                     <button className="btn btn-text" onClick={onBack}>&larr; Back</button>

@@ -1,6 +1,6 @@
-const API_BASE_URL = 'http://gateway.inno-clinic.com/api-profiles/Profile/Doctor/GetAll';
-const IDENTITY_API_DOMAIN = 'http://gateway.inno-clinic.com/api-identity';
-const DOCUMENTS_API_DOMAIN = 'http://gateway.inno-clinic.com/api-photos';
+const API_BASE_URL = 'https://gateway.inno-clinic.com/api-profiles/Profile/Doctor/GetAll';
+const IDENTITY_API_DOMAIN = 'https://gateway.inno-clinic.com/api-identity';
+const DOCUMENTS_API_DOMAIN = 'https://gateway.inno-clinic.com/api-photos';
 
 export const fetchDoctors = async () => {
     try {

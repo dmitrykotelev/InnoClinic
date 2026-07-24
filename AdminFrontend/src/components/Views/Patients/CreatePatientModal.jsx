@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { CancelDialog } from '../CancelDialog'; 
 
 // Укажите эндпоинт контроллера, который мы создали выше
-const API_BASE_PROFILES = 'http://gateway.inno-clinic.com/api-profiles/Profile/Patient';
+const API_BASE_PROFILES = 'https://gateway.inno-clinic.com/api-profiles/Profile/Patient';
 
 export const CreatePatientModal = ({ isOpen, onClose, onSuccess }) => {
     const initialForm = {

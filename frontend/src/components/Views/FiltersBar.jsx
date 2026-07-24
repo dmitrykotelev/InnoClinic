@@ -19,7 +19,7 @@ export const FiltersBar = ({
             value={selectedSpec}
             onChange={(e) => setSelectedSpec(e.target.value)}
         >
-            <option value="">Specializations</option>
+            <option value="">Any Specialiation</option>
             {specializations.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
         <select
@@ -27,7 +27,7 @@ export const FiltersBar = ({
             value={selectedOffice}
             onChange={(e) => setSelectedOffice(e.target.value)}
         >
-            <option value="">Offices</option>
+            <option value="">AnyOffice</option>
             {offices.map(o => <option key={o} value={o}>{o}</option>)}
         </select>
         <button

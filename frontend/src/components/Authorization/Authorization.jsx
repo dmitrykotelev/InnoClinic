@@ -25,10 +25,19 @@ const Authorization = ({ apiBaseUrl, isLoggedIn, currentUser, onLoginSuccess, on
         console.log("Local logout successful");
     };
 
-    const displayName = currentUser?.UserName
-        || currentUser?.preferred_username
-        || currentUser?.given_name
-        || "User";
+    let displayName = "User";
+
+    if (currentUser) {
+        if (currentUser.firstName || currentUser.lastName) {
+            displayName = `${currentUser.firstName || ''} ${currentUser.lastName || ''}`.trim();
+        } 
+        else {
+            displayName = currentUser.UserName
+                || currentUser.preferred_username
+                || currentUser.given_name
+                || "User";
+        }
+    }
 
     return (
         <div className="authorization-wrapper">

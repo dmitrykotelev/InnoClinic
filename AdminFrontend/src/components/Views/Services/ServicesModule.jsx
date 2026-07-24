@@ -17,8 +17,8 @@ export const ServicesModule = ({ onBack, apiBaseUrl }) => {
 
             try {
                 const [servicesRes, specializationsRes] = await Promise.all([
-                    fetch(`http://gateway.inno-clinic.com/api-services/Services/GetAll`),
-                    fetch(`http://gateway.inno-clinic.com/api-services/Specializations/GetAll`)
+                    fetch(`https://gateway.inno-clinic.com/api-services/Services/GetAll`),
+                    fetch(`https://gateway.inno-clinic.com/api-services/Specializations/GetAll`)
                 ]);
 
                 if (!servicesRes.ok || !specializationsRes.ok) {

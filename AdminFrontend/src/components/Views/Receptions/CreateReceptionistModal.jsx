@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { CancelDialog } from '../CancelDialog';
 
-const API_BASE_IDENTITY = 'http://gateway.inno-clinic.com/api-identity/Profile/Receptionist';
-const API_BASE_PHOTOS = 'http://gateway.inno-clinic.com/api-photos/Photo';
+const API_BASE_IDENTITY = 'https://gateway.inno-clinic.com/api-identity/Profile/Receptionist';
+const API_BASE_PHOTOS = 'https://gateway.inno-clinic.com/api-photos/Photo';
 
 export const CreateReceptionistModal = ({ isOpen, onClose, onSuccess, offices }) => {
     const initialForm = {

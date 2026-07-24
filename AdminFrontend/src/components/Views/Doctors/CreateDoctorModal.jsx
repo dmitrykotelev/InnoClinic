@@ -1,9 +1,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import '../../../styles/Global.css'; 
-const OFFICES_API_DOMAIN = 'http://gateway.inno-clinic.com/api-offices';
-const SPECS_API_DOMAIN = 'http://gateway.inno-clinic.com/api-services';
-const IDENTITY_API_DOMAIN = 'http://gateway.inno-clinic.com/api-identity';
-const PHOTOS_API_DOMAIN = 'http://gateway.inno-clinic.com/api-photos';
+const OFFICES_API_DOMAIN = 'https://gateway.inno-clinic.com/api-offices';
+const SPECS_API_DOMAIN = 'https://gateway.inno-clinic.com/api-services';
+const IDENTITY_API_DOMAIN = 'https://gateway.inno-clinic.com/api-identity';
+const PHOTOS_API_DOMAIN = 'https://gateway.inno-clinic.com/api-photos';
 
 export const CreateDoctorModal = ({ isOpen, onClose, onDoctorCreated }) => {
     const initialFormState = {

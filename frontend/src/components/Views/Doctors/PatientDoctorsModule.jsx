@@ -3,8 +3,8 @@ import { fetchDoctors } from './api';
 import { DoctorsView } from './DoctorsView';
 import '../../../styles/Global.css'; 
 
-const OFFICES_API_DOMAIN = 'http://gateway.inno-clinic.com/api-offices';
-const SPECS_API_DOMAIN = 'http://gateway.inno-clinic.com/api-services';
+const OFFICES_API_DOMAIN = 'https://gateway.inno-clinic.com/api-offices';
+const SPECS_API_DOMAIN = 'https://gateway.inno-clinic.com/api-services';
 
 export const PatientDoctorsModule = ({ onBack }) => {
     const [doctors, setDoctors] = useState([]);
@@ -65,7 +65,6 @@ export const PatientDoctorsModule = ({ onBack }) => {
         if (!doctors.length) return [];
 
         return doctors.map(doctor => {
-            // Ищем точное совпадение по ID
             const office = officesData.find(o => String(o.id ?? o.Id) === String(doctor.officeId));
             const spec = specsData.find(s => String(s.id ?? s.Id) === String(doctor.specializationId));
 

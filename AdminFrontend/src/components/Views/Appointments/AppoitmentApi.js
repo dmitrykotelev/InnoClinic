@@ -1,4 +1,4 @@
-const APPOINTMENTS_API_URL = 'http://gateway.inno-clinic.com/api-appointments/Appointments/Add';
+const APPOINTMENTS_API_URL = 'https://gateway.inno-clinic.com/api-appointments/Appointments/Add';
 
 export const createAppointment = async (appointmentData, currentUserId) => {
     const payload = {

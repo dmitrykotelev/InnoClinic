@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import '../../../styles/App.css'; 
 
-const API_BASE_APPOINTMENTS = 'http://gateway.inno-clinic.com/api-appointments/Appointments';
-const API_BASE_RESULTS = 'http://gateway.inno-clinic.com/api-appointments/Results'; 
-const API_BASE_PATIENTS = 'http://gateway.inno-clinic.com/api-profiles/Profile/Patient';
-const API_BASE_DOCTORS = 'http://gateway.inno-clinic.com/api-profiles/Profile/Doctor';
-const API_BASE_SERVICES = 'http://gateway.inno-clinic.com/api-services/Services/GetAll';
-const API_BASE_SPECS = 'http://gateway.inno-clinic.com/api-services/Specializations/GetAll'; 
+const API_BASE_APPOINTMENTS = 'https://gateway.inno-clinic.com/api-appointments/Appointments';
+const API_BASE_RESULTS = 'https://gateway.inno-clinic.com/api-appointments/Results'; 
+const API_BASE_PATIENTS = 'https://gateway.inno-clinic.com/api-profiles/Profile/Patient';
+const API_BASE_DOCTORS = 'https://gateway.inno-clinic.com/api-profiles/Profile/Doctor';
+const API_BASE_SERVICES = 'https://gateway.inno-clinic.com/api-services/Services/GetAll';
+const API_BASE_SPECS = 'https://gateway.inno-clinic.com/api-services/Specializations/GetAll'; 
 
 export const MedicalResultView = ({ appointmentId, currentDoctorId, onBack }) => {
     const [mode, setMode] = useState('create'); 
@@ -254,7 +254,7 @@ export const MedicalResultView = ({ appointmentId, currentDoctorId, onBack }) =>
                 <div><span className="doctor-info-label">Date of Result:</span> <br/><b style={{ fontSize: '16px' }}>{prefilledData.resultDate}</b></div>
                 <div><span className="doctor-info-label">Service:</span> <br/><b style={{ fontSize: '16px' }}>{prefilledData.serviceName}</b></div>
                 <div><span className="doctor-info-label">Patient Name:</span> <br/><b style={{ fontSize: '16px' }}>{prefilledData.patientName}</b></div>
-                <div><span className="doctor-info-label">Patient DOB:</span> <br/><b style={{ fontSize: '16px' }}>{prefilledData.patientDOB}</b></div>
+                <div><span className="doctor-info-label">Birthday:</span> <br/><b style={{ fontSize: '16px' }}>{prefilledData.patientDOB}</b></div>
                 <div><span className="doctor-info-label">Doctor Name:</span> <br/><b style={{ fontSize: '16px' }}>{prefilledData.doctorName}</b></div>
                 <div><span className="doctor-info-label">Specialization:</span> <br/><b style={{ fontSize: '16px' }}>{prefilledData.doctorSpec}</b></div>
             </div>

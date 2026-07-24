@@ -3,12 +3,12 @@ import '../../../styles/Global.css';
 import { createAppointment } from './AppoitmentApi';
 import { AppointmentModal } from './AppoitmentModal';
 
-const API_BASE_APPOINTMENTS = 'http://gateway.inno-clinic.com/api-appointments/Appointments';
-const API_BASE_DOCTORS = 'http://gateway.inno-clinic.com/api-profiles/Profile/Doctor';
-const API_BASE_PATIENTS = 'http://gateway.inno-clinic.com/api-profiles/Profile/Patient';
-const API_BASE_OFFICES = 'http://gateway.inno-clinic.com/api-offices/Offices';
-const API_BASE_SERVICES = 'http://gateway.inno-clinic.com/api-services/Services';
-const API_BASE_IDENTITY= 'http://gateway.inno-clinic.com/api-identity';
+const API_BASE_APPOINTMENTS = 'https://gateway.inno-clinic.com/api-appointments/Appointments';
+const API_BASE_DOCTORS = 'https://gateway.inno-clinic.com/api-profiles/Profile/Doctor';
+const API_BASE_PATIENTS = 'https://gateway.inno-clinic.com/api-profiles/Profile/Patient';
+const API_BASE_OFFICES = 'https://gateway.inno-clinic.com/api-offices/Offices';
+const API_BASE_SERVICES = 'https://gateway.inno-clinic.com/api-services/Services';
+const API_BASE_IDENTITY= 'https://gateway.inno-clinic.com/api-identity';
 
 export const AppointmentsModule = ({ onBack }) => {
     const [appointments, setAppointments] = useState([]);
@@ -404,14 +404,14 @@ export const AppointmentsModule = ({ onBack }) => {
                 ) : (
                     <table className="data-table">
                         <thead>
-                            <tr>
+                            <tr style={{textAlign: 'center'}}>
                                 <th>Date & Time</th>
                                 <th>Doctor Full Name</th>
                                 <th>Patient Full Name</th>
                                 <th>Patient Phone</th>
                                 <th>Service</th>
-                                <th style={{textAlign: 'center'}}>Status</th>
-                                <th style={{textAlign: 'right'}}>Actions</th>
+                                <th>Status</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>

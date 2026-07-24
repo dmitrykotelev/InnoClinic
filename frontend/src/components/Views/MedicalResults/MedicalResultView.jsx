@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import '../../../styles/App.css'; 
 
-const API_BASE_APPOINTMENTS = 'http://gateway.inno-clinic.com/api-appointments/Appointments';
-const API_BASE_RESULTS = 'http://gateway.inno-clinic.com/api-appointments/Results'; 
-const API_BASE_PATIENTS = 'http://gateway.inno-clinic.com/api-profiles/Profile/Patient';
-const API_BASE_DOCTORS = 'http://gateway.inno-clinic.com/api-profiles/Profile/Doctor';
-const API_BASE_SERVICES = 'http://gateway.inno-clinic.com/api-services/Services/GetAll';
-const API_BASE_SPECS = 'http://gateway.inno-clinic.com/api-services/Specializations/GetAll'; 
+const API_BASE_APPOINTMENTS = 'https://gateway.inno-clinic.com/api-appointments/Appointments';
+const API_BASE_RESULTS = 'https://gateway.inno-clinic.com/api-appointments/Results'; 
+const API_BASE_PATIENTS = 'https://gateway.inno-clinic.com/api-profiles/Profile/Patient';
+const API_BASE_DOCTORS = 'https://gateway.inno-clinic.com/api-profiles/Profile/Doctor';
+const API_BASE_SERVICES = 'https://gateway.inno-clinic.com/api-services/Services/GetAll';
+const API_BASE_SPECS = 'https://gateway.inno-clinic.com/api-services/Specializations/GetAll'; 
 
 export const MedicalResultView = ({ appointmentId, currentDoctorId, onBack }) => {
     const [mode, setMode] = useState('create'); 
@@ -24,6 +24,7 @@ export const MedicalResultView = ({ appointmentId, currentDoctorId, onBack }) =>
     const [touched, setTouched] = useState({});
     const [errors, setErrors] = useState({});
     const [isSaving, setIsSaving] = useState(false);
+    const [isDownloading, setIsDownloading] = useState(false); // Новое состояние для PDF
     const [showCancelDialog, setShowCancelDialog] = useState(false);
 
     useEffect(() => {
@@ -35,7 +36,6 @@ export const MedicalResultView = ({ appointmentId, currentDoctorId, onBack }) =>
             }
 
             try {
-                // БЕЗОПАСНАЯ ИНЖЕКЦИЯ ТОКЕНА
                 const token = localStorage.getItem('accessToken');
                 const headers = { 
                     'Accept': 'application/json',
@@ -86,7 +86,7 @@ export const MedicalResultView = ({ appointmentId, currentDoctorId, onBack }) =>
                     ? (specObj.name || specObj.Name) 
                     : (doctor.specializationName || doctor.SpecializationName || doctor.specialization?.name || 'Unknown Specialization');
 
-                const formatName = (p) => p.firstName ? `${p.lastName || ''} ${p.firstName} ${p.middleName || ''}`.trim() : 'Unknown';
+                const formatName = (p) => p.firstName ? `${p.lastName || ''} ${p.firstName}${p.middleName || ''}`.trim() : 'Unknown';
 
                 const sourceDate = existingResult 
                     ? (existingResult.date || existingResult.Date || existingResult.createdAt || existingResult.CreatedAt || appointment.date || appointment.Date)
@@ -173,7 +173,6 @@ export const MedicalResultView = ({ appointmentId, currentDoctorId, onBack }) =>
         setIsSaving(true);
 
         try {
-            // БЕЗОПАСНАЯ ИНЖЕКЦИЯ ТОКЕНА ДЛЯ СОХРАНЕНИЯ
             const token = localStorage.getItem('accessToken');
             const payload = {
                 id: existingResultId || 0,
@@ -206,6 +205,49 @@ export const MedicalResultView = ({ appointmentId, currentDoctorId, onBack }) =>
             alert("Error saving result: " + err.message);
         } finally {
             setIsSaving(false);
+        }
+    };
+
+    // ФУНКЦИЯ ДЛЯ СКАЧИВАНИЯ PDF
+    const handleDownloadPdf = async () => {
+        setIsDownloading(true);
+        try {
+            const token = localStorage.getItem('accessToken');
+            const res = await fetch(`${API_BASE_APPOINTMENTS}/${appointmentId}/Result/Download`, {
+                method: 'GET',
+                headers: {
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                }
+            });
+
+            if (!res.ok) {
+                const errText = await res.text();
+                throw new Error(errText || "Failed to download PDF");
+            }
+
+            // Получаем бинарные данные
+            const blob = await res.blob();
+            // Создаем временную ссылку на файл
+            const url = window.URL.createObjectURL(blob);
+            
+            // Создаем невидимый элемент <a> для триггера скачивания
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = `AppointmentResult_${appointmentId}.pdf`;
+            
+            document.body.appendChild(a);
+            a.click();
+            
+            // Очищаем память
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+
+        } catch (err) {
+            console.error("PDF download error:", err);
+            alert("Error downloading PDF: " + err.message);
+        } finally {
+            setIsDownloading(false);
         }
     };
 
@@ -272,6 +314,17 @@ export const MedicalResultView = ({ appointmentId, currentDoctorId, onBack }) =>
 
                     <div className="modal-footer mt-4">
                         <button className="btn btn-secondary" onClick={onBack}>Back to Schedule</button>
+                        
+                        {/* КНОПКА СКАЧИВАНИЯ PDF */}
+                        <button 
+                            className="btn btn-primary" 
+                            style={{ backgroundColor: '#28a745', borderColor: '#28a745' }} // Зеленый цвет для PDF
+                            onClick={handleDownloadPdf} 
+                            disabled={isDownloading}
+                        >
+                            {isDownloading ? 'Downloading...' : 'Download PDF'}
+                        </button>
+
                         {isOwnerDoctor && (
                             <button className="btn btn-primary" onClick={() => setMode('edit')}>Edit Result</button>
                         )}

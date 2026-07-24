@@ -24,8 +24,8 @@ export const ServicesModule = ({ onBack }) => {
                 // В некоторых версиях твоего бэкенда GetAll требует POST запрос с пустым телом [].
                 // Если стандартный GET отдает ошибку 405, поменяй method на 'POST' и добавь body: JSON.stringify([])
                 const [servicesRes, specializationsRes] = await Promise.all([
-                    fetch(`http://gateway.inno-clinic.com/api-services/Services/GetAll`, { headers: authHeader }),
-                    fetch(`http://gateway.inno-clinic.com/api-services/Specializations/GetAll`, { headers: authHeader })
+                    fetch(`https://gateway.inno-clinic.com/api-services/Services/GetAll`, { headers: authHeader }),
+                    fetch(`https://gateway.inno-clinic.com/api-services/Specializations/GetAll`, { headers: authHeader })
                 ]);
 
                 if (!servicesRes.ok || !specializationsRes.ok) {
