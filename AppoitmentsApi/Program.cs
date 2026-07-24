@@ -79,6 +79,7 @@ namespace AppoitmentsApi
 
             app.UseAuthorization();
 
+
             app.MapControllers();
 
             app.Run();

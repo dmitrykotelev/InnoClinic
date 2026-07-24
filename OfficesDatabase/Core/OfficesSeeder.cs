@@ -20,6 +20,7 @@ namespace OfficesDatabase.Core
                 {
                     new Office
                     {
+                        Id = 1,
                         Adress = "Moscow ",
                         PhotoId = Guid.NewGuid(),
                         PhoneNumber = "+7 (495) 123-45-67",
@@ -34,6 +35,7 @@ namespace OfficesDatabase.Core
                     },
                     new Office
                     {
+                        Id = 3,
                         Adress = "Brest",
                         PhotoId = Guid.NewGuid(),
                         PhoneNumber = "+7 (383) 999-88-77",

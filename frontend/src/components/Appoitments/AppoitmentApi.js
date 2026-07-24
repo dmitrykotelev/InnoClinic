@@ -61,7 +61,7 @@ const getNumericPatientId = async (token) => {
         console.error("Не удалось найти ID. Доступные поля:", Object.keys(decodedToken));
         throw new Error("Failed to extract Account ID from the token.");
     }
-
+    
     const profileRes = await fetch(`${PATIENT_PROFILE_API_URL}?accountId=${accountId}`, {
         method: 'GET',
         headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` }
@@ -83,7 +83,7 @@ export const createAppointment = async (appointmentData) => {
         patientId: numericPatientId,
         doctorId: appointmentData.doctor.id,
         serviceId: appointmentData.service.id,
-        date: appointmentData.date, 
+        date: appointmentData.date,
         data: appointmentData.date, 
         time: `${appointmentData.time}:00`,
         isApproved: false 

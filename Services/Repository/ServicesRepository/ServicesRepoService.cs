@@ -3,6 +3,7 @@ using Middleware.AppoitnmentFiltrator;
 using Middleware.Mapper.ServicesDto;
 using ServicesDatabase.Models;
 using ServicesDatabase.Repository;
+using System.Linq.Expressions;
 
 namespace Middleware.Repository.ServicesRepository
 {

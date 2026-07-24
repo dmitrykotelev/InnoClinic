@@ -114,6 +114,7 @@ namespace OfficesApi
             app.UseAuthentication(); // Добавлено
             app.UseAuthorization();
 
+
             app.MapControllers();
 
             app.Run();

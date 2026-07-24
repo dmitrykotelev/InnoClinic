@@ -40,6 +40,9 @@ const MainApp = () => {
     useEffect(() => {
         checkSession();
     }, []);
+    const handleSaveAppointment = async (appointmentData) => {
+            const token = localStorage.getItem('accessToken');
+            const userId = currentUser?.sub || currentUser?.nameid;
 
     const handleSaveAppointment = async (appointmentData) => {
         const token = localStorage.getItem('accessToken');

@@ -56,6 +56,7 @@ export const AppointmentModal = ({
     const [showExitDialog, setShowExitDialog] = useState(false);
     const [isLoadingData, setIsLoadingData] = useState(false);
     
+    // --- СТЕЙТЫ ДАННЫХ ---
     const [doctors, setDoctors] = useState([]);
     const [specializations, setSpecializations] = useState([]);
     const [services, setServices] = useState([]);
@@ -70,12 +71,14 @@ export const AppointmentModal = ({
 
     const searchTimers = useRef({ spec: null, doctor: null, service: null });
     let SlotSize = 10;
-    
+
+    var SlotSize = 10;
     const fetchSpecificData = (targetField, currentInputs, currentForm) => {
         const specId = currentForm.specialization?.id || null;
         const token = localStorage.getItem('accessToken');
         const authHeader = token ? { 'Authorization': `Bearer ${token}` } : {};
 
+        // 1. Базовый массив текстовых фильтров (без поля id)
         const payload = [
             { fieldName: 'specialization', value: currentInputs.spec || "", operation: 'contains' },
             { fieldName: 'doctor', value: currentInputs.doctor || "", operation: 'contains' },
@@ -84,26 +87,40 @@ export const AppointmentModal = ({
 
         if (specId) payload.push({ fieldName: 'specializationId', value: String(specId), operation: 'equals' });
 
+        console.log(`[API] POST Запрос (массив) на обновление: ${targetField.toUpperCase()}`, payload);
+
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', ...authHeader },
             body: JSON.stringify(payload)
         };
 
+        // Отправляем массив на нужные эндпоинты
         if (targetField === 'spec' || targetField === 'all') {
             fetch(SPECS_API, requestOptions).then(res => res.json()).then(data => {
                 if (Array.isArray(data)) setSpecializations(data.filter(spec => spec.isActive === true || spec.isActiove === true));
             }).catch(() => {});
+                    }
+                })
+                .catch(err => console.error("Specs API Error:", err));
         }
+
         if (targetField === 'doctor' || targetField === 'all') {
             fetch(DOCTORS_API, requestOptions).then(res => res.json()).then(data => {
                 if (Array.isArray(data)) setDoctors(data.filter(doc => doc.status === true || doc.status === 'At work'));
             }).catch(() => {});
+                    }
+                })
+                .catch(err => console.error("Doctors API Error:", err));
         }
+
         if (targetField === 'service' || targetField === 'all') {
             fetch(SERVICES_API, requestOptions).then(res => res.json()).then(data => {
                 if (Array.isArray(data)) setServices(data.filter(serv => serv.isActive === true || serv.status === true));
             }).catch(() => {});
+                    }
+                })
+                .catch(err => console.error("Services API Error:", err));
         }
     };
 
@@ -121,7 +138,7 @@ export const AppointmentModal = ({
                 fetch(CATEGORIES_API, { headers: authHeader }).then(r => r.json()).catch(() => [])
             ]).then(([specsList, docsList, servsList, offsList, catsList]) => {
                 const activeOffices = offsList.filter(o => o.isActive === true || o.status === true);
-                setOffices(activeOffices.length > 0 ? activeOffices : DEFAULT_OFFICE);
+                    setOffices(activeOffices.length > 0 ? activeOffices : DEFAULT_OFFICE);
                 setCategories(catsList);
 
                 if (rescheduleData) {
@@ -149,7 +166,7 @@ export const AppointmentModal = ({
                 } else {
                     fetchSpecificData('all', inputs, form);
                 }
-                setIsLoadingData(false);
+            setIsLoadingData(false);
             });
         } else {
             setForm({ specialization: null, doctor: null, service: null, office: null, date: '', time: '' });
@@ -158,21 +175,28 @@ export const AppointmentModal = ({
         }
     }, [isModalOpen, rescheduleData]);
 
+    // Обработчик изменения текста (Ввод пользователя + каскадная очистка)
     const handleComboChange = (field, textValue) => {
         if (isRescheduling && field !== 'doctor') return;
         let nextInputs = { ...inputs, [field]: textValue };
         const formField = field === 'spec' ? 'specialization' : field;
         let nextForm = { ...form, [formField]: null, date: '', time: '' };
 
-        if (field === 'spec') {
-            nextInputs.doctor = ''; nextForm.doctor = null;
-            nextInputs.service = ''; nextForm.service = null;
-            nextForm.office = null;
+        if (form[formField] !== null) {
+            nextForm[formField] = null; 
+
+            if (field === 'spec') {
+                nextInputs.doctor = ''; nextForm.doctor = null;
+                nextInputs.service = ''; nextForm.service = null;
+                nextForm.office = null;
         } else if (field === 'doctor' && !isRescheduling) {
-            nextInputs.service = ''; nextForm.service = null;
-            nextForm.office = null;
-        } 
-        
+                nextInputs.service = ''; nextForm.service = null;
+                nextForm.office = null;
+            } 
+            nextForm.date = '';
+            nextForm.time = '';
+            setAvailableTimeSlots([]);
+            
         setAvailableTimeSlots([]); setErrors({}); 
         setInputs(nextInputs); setForm(nextForm);
 
@@ -180,6 +204,8 @@ export const AppointmentModal = ({
         searchTimers.current[field] = setTimeout(() => fetchSpecificData('all', nextInputs, nextForm), 300);
     };
 
+    // --- ОБРАБОТЧИК ВЫБОРА ИЗ СПИСКА ---
+    // --- ОБРАБОТЧИК ВЫБОРА ИЗ СПИСКА ---
     const handleComboSelect = async (field, item) => {
         if (isRescheduling && field !== 'doctor') return;
         let nextInputs = { ...inputs, [field]: item.name || `${item.lastName} ${item.firstName}` };
@@ -191,8 +217,8 @@ export const AppointmentModal = ({
                 const docOfficeId = item.officeId || item.OfficeId;
                 const docOffice = offices.find(o => String(o.id) === String(docOfficeId));
                 if (docOffice) nextForm.office = docOffice;
-            }
-
+                            }
+                            
             const specId = item.specializationId || item.SpecializationId;
             if (specId) {
                 const docSpec = specializations.find(s => String(s.id) === String(specId));
@@ -203,6 +229,7 @@ export const AppointmentModal = ({
             }
         }
 
+        // Обновляем состояния разом
         setInputs(nextInputs);
         setForm(nextForm);
         setErrors(prev => ({ ...prev, [field]: null }));
@@ -216,9 +243,12 @@ export const AppointmentModal = ({
     const handleBlur = (field) => setTouched(prev => ({ ...prev, [field]: true }));
     const handleComboFocus = (field) => { if (!isRescheduling || field === 'doctor') fetchSpecificData(field, inputs, form); };
 
+    // --- ЛОГИКА 2: ГЕНЕРАЦИЯ ТАЙМ-СЛОТОВ ---
     const getRequiredSlotsCount = (service) => {
         if (!service) return 1;
         const catId = service.categoryId || service.serviceCategoryId; 
+        if (!catId) return 1; 
+
         const category = categories.find(c => c.id === catId);
         const catName = category?.name?.toLowerCase() || '';
         
@@ -227,6 +257,22 @@ export const AppointmentModal = ({
         if (catName.includes('analys')) { SlotSize = 10; return 1; }   
         return 1; 
     };
+
+    const allDailySlots = useMemo(() => {
+        const slots = [];
+        let hour = 9;
+        let minute = 0;
+        while (hour < 18) {
+            const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+            slots.push(timeString);
+            minute += 10;
+            if (minute === 60) {
+                hour += 1;
+                minute = 0;
+            }
+        }
+        return slots;
+    }, []);
 
     useEffect(() => {
         if (form.doctor?.id && form.date) {
@@ -240,6 +286,7 @@ export const AppointmentModal = ({
             setAvailableTimeSlots([]);
         }
     }, [form.doctor?.id, form.date]);
+
 
     const getEndTime = (startTime, slotsCount) => {
         const [hours, minutes] = startTime.split(':').map(Number);
@@ -255,6 +302,7 @@ export const AppointmentModal = ({
         if (touched.office && !form.office) newErrors.office = "Please, choose the office";
         if (touched.date && !form.date) newErrors.date = "Please, select the date";
         if (touched.time && !form.time) newErrors.time = "Please, select the time slot";
+        
         setErrors(newErrors);
     }, [form, inputs, touched]);
 
@@ -265,6 +313,8 @@ export const AppointmentModal = ({
         if (externalOnClose) externalOnClose();
         else setInternalIsOpen(false);
     };
+
+    const isDateTimeEnabled = !!(form.specialization && form.service && form.office);
 
     const handleCloseClick = () => setShowExitDialog(true);
     const handleExitConfirm = () => { setShowExitDialog(false); closeHandler(); };
@@ -286,8 +336,8 @@ export const AppointmentModal = ({
         <div className="appointment-wrapper">
             {externalIsOpen === undefined && (
                 <button className="btn-action" onClick={() => setInternalIsOpen(true)}>
-                    ➕ Appointment
-                </button>
+                ➕ Appointment
+            </button>
             )}
 
             {isModalOpen && (
@@ -388,8 +438,10 @@ export const AppointmentModal = ({
                                                 <div className="empty-state" style={{gridColumn: '1 / -1', padding: '20px', color: 'var(--error-color)'}}>No free time slots</div>
                                             ) : (
                                                 availableTimeSlots.map(slot => {
+                                                    // Отрезаем секунды, получаем "09:00"
                                                     const cleanSlot = slot.substring(0, 5); 
                                                     const requiredSlots = getRequiredSlotsCount(form.service);
+                                                    
                                                     return (
                                                         <button 
                                                             key={slot}
@@ -428,10 +480,41 @@ export const AppointmentModal = ({
                         <div className="flex-row" style={{justifyContent: 'center'}}>
                             <button className="btn btn-primary" onClick={handleExitConfirm}>Yes</button>
                             <button className="btn btn-secondary" onClick={handleExitCancel}>No</button>
-                        </div>
                     </div>
                 </div>
             )}
+        </div>
+    );
+};
+
+const Combobox = ({ label, value, options, error, onChange, onSelect, onBlur, onFocus }) => {
+    const [isOpen, setIsOpen] = useState(false);
+
+    return (
+        <div className="form-group combo-box">
+            <label>{label}</label>
+            <input 
+                type="text"
+                className={`form-control ${error ? 'is-invalid' : ''}`}
+                value={value}
+                onChange={(e) => { onChange(e.target.value); setIsOpen(true); }}
+                onFocus={() => { 
+                    setIsOpen(true); 
+                    if (onFocus) onFocus(); 
+                }}
+                onBlur={() => { setTimeout(() => { setIsOpen(false); onBlur(); }, 150); }}
+                placeholder={`Start typing ${label.toLowerCase()}...`}
+            />
+            {isOpen && options.length > 0 && (
+                <ul className="combo-dropdown">
+                    {options.map(opt => (
+                        <li key={opt.id} onClick={() => onSelect(opt)}>
+                            {opt.name}
+                        </li>
+                    ))}
+                </ul>
+            )}
+            {error && <span className="error-msg" style={{color: 'red', fontSize: '12px'}}>{error}</span>}
         </div>
     );
 };
