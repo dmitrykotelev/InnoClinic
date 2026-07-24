@@ -14,7 +14,7 @@ namespace AppoitmentsDatabase
     {
         public AppointmentsRepository(AppoitmentDbContext context) : base(context) { }
 
-        public List<Appoitment> GetAllByDoctorId(int DoctorId)
+        public virtual List<Appoitment> GetAllByDoctorId(int DoctorId)
         {
             return _dbSet.Where(x => x.DoctorId == DoctorId).ToList();
         }
@@ -29,7 +29,7 @@ namespace AppoitmentsDatabase
             return response;
         }
 
-        public Appoitment Reshedulle(int id, DateTime date)
+        public virtual Appoitment Reshedulle(int id, DateTime date)
         {
             var response = _dbSet.Find(id);
             response.Date = DateOnly.FromDateTime(date);

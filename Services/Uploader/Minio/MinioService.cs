@@ -26,12 +26,36 @@ namespace Middleware.Uploader.Minio
                 .WithObjectSize(stream.Length)
                 .WithContentType(file.ContentType);
 
+            bool bExists = await _minioClient.BucketExistsAsync(new BucketExistsArgs().WithBucket(bucketName));
+            if (!bExists)
+            {
+                await _minioClient.MakeBucketAsync(new MakeBucketArgs().WithBucket(bucketName));
+                Console.WriteLine($"=== Бакет '{bucketName}' был успешно создан в MinIO! ===");
+            }
+
             var response = await _minioClient.PutObjectAsync(putArgs);
 
             if (response == null)
                 return false;
 
             return true;
+        }
+
+        public async Task<MemoryStream> GetFileStreamAsync(string bucketName, string photoName)
+        {
+            var memoryStream = new MemoryStream();
+            var args = new GetObjectArgs()
+                .WithBucket(bucketName)
+                .WithObject(photoName)
+                .WithCallbackStream((stream) =>
+                {
+                    stream.CopyTo(memoryStream);
+                });
+
+            await _minioClient.GetObjectAsync(args);
+            memoryStream.Position = 0;
+
+            return memoryStream;
         }
 
         public async Task<string> GetUrl(string bucketName, string photoName)
@@ -41,9 +65,11 @@ namespace Middleware.Uploader.Minio
                 .WithObject(photoName)
                 .WithExpiry(60 * 60 * 24);
 
-            var Url = await _minioClient.PresignedGetObjectAsync(args);
+            var internalUrl = await _minioClient.PresignedGetObjectAsync(args);
 
-            return Url;
+            var publicUrl = internalUrl.Replace("http://minio:9000", "https://gateway.inno-clinic.com/s3");
+
+            return publicUrl;
         }
     }
 }

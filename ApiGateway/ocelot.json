@@ -244,8 +244,22 @@
       "UpstreamPathTemplate": "/api-appointments/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Delete", "Put" ],
       "AuthenticationOptions": { "AuthenticationProviderKey": "MyAuthKey" }
+    },
+    {
+      "DownstreamPathTemplate": "/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "minio",
+          "Port": 9000
+        }
+      ],
+      "UpstreamPathTemplate": "/s3/{everything}",
+      "UpstreamHttpMethod": [ "Get" ]
     }
   ],
+
+
   "GlobalConfiguration": {
     "BaseUrl": "http://gateway.inno-clinic.com"
   }

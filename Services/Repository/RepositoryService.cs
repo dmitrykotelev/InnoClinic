@@ -19,14 +19,14 @@ namespace Middleware.Repository
             _mapper = mapper;
         }
 
-        public TT GetById(int id)
+        virtual public TT GetById(int id)
         {
             var data = _repo.GetById(id);
             TT dto = _mapper.Map<TT>(data);
 
             return _mapper.Map<TT>(_repo.GetById(id));
         }
-        public TT GetByGuId(Guid id)
+        virtual public TT GetByGuId(Guid id)
         {
             var data = _repo.GetByGuId(id);
             TT dto = _mapper.Map<TT>(data);
@@ -34,7 +34,7 @@ namespace Middleware.Repository
             return _mapper.Map<TT>(_repo.GetByGuId(id));
         }
 
-        public List<TT> GetAll()
+        virtual public List<TT> GetAll()
         {
             var data = _repo.GetAll();
             List<TT> dtoList = _mapper.Map<List<TT>>(data);
@@ -42,26 +42,26 @@ namespace Middleware.Repository
             return dtoList;
         }
 
-        public TT Add(TT dto)
+        virtual public TT Add(TT dto)
         {
             var data = _mapper.Map<T>(dto);
 
             return _mapper.Map<TT>(_repo.Add(data));
         }
 
-        public TT Update(TT dto)
+        virtual public TT Update(TT dto)
         {
             var data = _mapper.Map<T>(dto);
 
             return _mapper.Map<TT>(_repo.Update(data));
         }
 
-        public IQueryable<T> GetBaseQuery()
+        virtual public IQueryable<T> GetBaseQuery()
         {
             return _repo.GetBaseQuery();
         }
 
-        public bool Delete(int id)
+        virtual public bool Delete(int id)
         {
             var data = _repo.Delete(id);
 

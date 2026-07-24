@@ -2,7 +2,6 @@
 using Middleware.Mapper;
 using Middleware.Repository.DocumentsRepository;
 using Middleware.Uploader;
-using Middleware.Uploader.Minio;
 
 namespace DocumentsApi.Controllers
 {

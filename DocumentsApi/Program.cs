@@ -1,9 +1,9 @@
 using DocumentsDatabase;
 using Microsoft.EntityFrameworkCore;
 using Middleware.Mapper;
-using Middleware.Minio;
 using Middleware.Repository.DocumentsRepository;
 using Middleware.Uploader;
+using Middleware.Uploader.Minio;
 using Minio;
 using Minio.AspNetCore;
 

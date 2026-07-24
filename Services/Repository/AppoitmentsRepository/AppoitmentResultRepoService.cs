@@ -18,7 +18,7 @@ namespace Middleware.Repository.AppoitmentsRepository
             _appoRepo = repository;
         }
 
-        public AppoitmentResultDto GetByAppoitmentId(string AppoitmentId)
+        virtual public AppoitmentResultDto GetByAppoitmentId(string AppoitmentId)
         {
             var response = _appoRepo.GetByAppoitmentId(AppoitmentId);
             return _mapper.Map<AppoitmentResultDto>(response);

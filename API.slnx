@@ -26,6 +26,12 @@
     <Project Path="ServicesApi/ServicesApi.csproj" Id="cc314152-1271-427c-a4c3-6788257fdb10" />
     <Project Path="ServicesDatabase/ServicesDatabase.csproj" Id="6566477e-a996-4e47-a7ab-203583d964c7" />
   </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="../AppoitmentsTests/AppoitmentsTests.csproj" Id="cdd5ad4e-d56a-488a-adbe-70b0ebd4db99" />
+    <Project Path="../IdentityServerTests/IdentityServerTests.csproj" Id="b8c5dbf7-6628-4850-b3d6-93999359441a" />
+    <Project Path="../ProfilesTests/ProfilesTests.csproj" Id="f1392390-2a5e-48f9-a2f9-32f242507808" />
+    <Project Path="../ServicesTests/ServicesTests.csproj" Id="a9edab2a-548b-49cd-909e-9cc2419879ad" />
+  </Folder>
   <Project Path="ApiGateway/ApiGateway.csproj" Id="12b4ac78-2b99-4481-981a-8d72ab960548" />
   <Project Path="docker-compose.dcproj">
     <Build />

@@ -15,19 +15,6 @@ namespace ServicesApi
             var builder = WebApplication.CreateBuilder(args);
 
             var corsSettings = builder.Configuration.GetSection("CorsSettings").Get<CorsSettings>();
-            builder.Services.AddCors(options =>
-            {
-                options.AddPolicy("AllowReactApp",
-                    policy =>
-                    {
-                        if (corsSettings?.AllowedOrigins != null && corsSettings.AllowedOrigins.Length > 0)
-                        {
-                            policy.WithOrigins(corsSettings.AllowedOrigins)
-                                  .AllowAnyHeader()
-                                  .AllowAnyMethod();
-                        }
-                    });
-            });
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
@@ -83,7 +70,6 @@ namespace ServicesApi
 
             var app = builder.Build();
 
-            // Автоматическое применение миграций при запуске
             using (var scope = app.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
@@ -104,9 +90,8 @@ namespace ServicesApi
                 app.UseSwaggerUI();
             }
 
-            app.UseCors("AllowReactApp");
 
-            app.UseAuthentication(); // Добавлено
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllers();

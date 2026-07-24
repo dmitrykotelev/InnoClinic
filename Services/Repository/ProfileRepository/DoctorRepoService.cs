@@ -16,19 +16,19 @@ namespace Middleware.Repository.ProfileRepository
             _doctorRepo = repo;
         }
 
-        public List<DoctorDto> GetAll(string name)
+        virtual public List<DoctorDto> GetAll(string name)
         {
             var response = _mapper.Map<List<DoctorDto>>(_doctorRepo.GetAll(name));
 
             return response;
         }
-        public List<DoctorDto> GetAll(IQueryable<Doctor> query)
+        virtual public List<DoctorDto> GetAll(IQueryable<Doctor> query)
         {
             var response = _mapper.Map<List<DoctorDto>>(_doctorRepo.GetAll(query));
 
             return response;
         }
-        public DoctorDto GetByAccId (string id)
+        virtual public DoctorDto GetByAccId (string id)
         {
             var response = _mapper.Map<DoctorDto>(_doctorRepo.GetByAccId(id));
 

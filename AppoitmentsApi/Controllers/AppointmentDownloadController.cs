@@ -6,9 +6,8 @@ using Middleware.Repository.AppoitmentsRepository;
 
 namespace AppointmentsApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
-    [Authorize]
     public class AppointmentsController : ControllerBase
     {
         private readonly AppoitmentRepoService _appointmentRepo;
@@ -18,7 +17,7 @@ namespace AppointmentsApi.Controllers
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger<AppointmentsController> _logger;
 
-        private const string GatewayUrl = "http://gateway.inno-clinic.com";
+        private const string GatewayUrl = "http://clinic-gateway:8080";
 
         public AppointmentsController(
             AppoitmentRepoService appointmentRepo,
@@ -40,7 +39,7 @@ namespace AppointmentsApi.Controllers
             var appointment = _appointmentRepo.GetById(id);
             if (appointment == null) return NotFound("Appointment not found");
 
-            var result =  _resultRepo.GetById(id);
+            var result =  _resultRepo.GetByAppoitmentId(id.ToString());
 
             if (result == null || string.IsNullOrEmpty(result.Conclusion))
             {

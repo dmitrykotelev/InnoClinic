@@ -35,6 +35,8 @@ namespace ProfilesApi.Controllers
             {
                 AccountId = accountId,
                 IsProfileCreated = true,
+                FirestName = profile.FirstName,
+                LastName = profile.LastName
             });
         }
     }

@@ -16,7 +16,7 @@ namespace Middleware.Repository.ServicesRepository
             _specRepo = repo;
         }
 
-        public List<SpecializationDto> GetAll(string name)
+        virtual public List<SpecializationDto> GetAll(string name)
         {
             var response = _mapper.Map<List<SpecializationDto>>(_specRepo.GetAll(name));
 

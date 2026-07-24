@@ -25,18 +25,16 @@ namespace ApiGateway
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(authenticationProviderKey, options =>
                 {
-                    // ИСПРАВЛЕНИЕ: Скачиваем настройки безопасности внутри сети Docker
                     options.MetadataAddress = $"{internalIdentityUrl}/.well-known/openid-configuration";
                     options.RequireHttpsMetadata = false;
 
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
-                        // Проверяем, что токен был выдан именно нашим внешним Identity сервером
                         ValidateIssuer = true,
                         ValidIssuer = externalIdentityUrl,
                         ValidateAudience = false,
                         ValidateLifetime = true,
-                        ValidateIssuerSigningKey = false // Если захочешь строгую проверку подписи, поставь true
+                        ValidateIssuerSigningKey = false 
                     };
                 });
 
@@ -52,7 +50,6 @@ namespace ApiGateway
 
             var app = builder.Build();
 
-            // ВАЖНО: CORS вызывается строго ДО Ocelot, чтобы перехватывать OPTIONS-запросы
             app.UseCors("AllowAll");
 
             app.UseAuthentication();

@@ -44,7 +44,15 @@ namespace IdentityServer.Controllers
             {
                 _logger.LogInformation($"Registration start, Email - ");
                 var user = new AppUser { UserName = model.Email, Email = model.Email };
+
                 var result = await _userManager.CreateAsync(user, model.Password);
+
+                if (!result.Succeeded)
+                {
+                    _logger.LogWarning($"Registration error - {result.Errors}");
+                    return BadRequest(result.Errors);
+                }
+
                 string roleName = RoleHelper.Patient;
                 var roleResult = await _userManager.AddToRoleAsync(user, roleName);
 
@@ -54,31 +62,22 @@ namespace IdentityServer.Controllers
                     return StatusCode(500, new { Message = "Ошибка при назначении прав доступа." });
                 }
 
+                _logger.LogInformation($"Registration Succeed, Email - {user.Email}");
+                var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
 
-                if (result.Succeeded)
-                {
-                    _logger.LogInformation($"Registration Succeed, Email - {user.Email}");
-                    var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                    var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+                var gatewayUrl = "http://gateway.inno-clinic.com/api-identity";
+                var confirmationLink = $"{gatewayUrl}/Registration/ConfirmEmail?userId={user.Id}&code={encodedToken}";
 
-                    var gatewayUrl = "http://gateway.inno-clinic.com/api-identity";
-
-                    var confirmationLink = $"{gatewayUrl}/Registration/ConfirmEmail?userId={user.Id}&code={encodedToken}";
-
-                    _logger.LogInformation($"Created profile creation link for {user.Id} {user.Email}");
-
+                _logger.LogInformation($"Created profile creation link for {user.Id} {user.Email}");
 #if DEBUG
-                    Console.WriteLine("Debug version");
-                    await _userManager.AddClaimAsync(user, new Claim("create_profile_link", confirmationLink));
+                Console.WriteLine("Debug version");
+                await _userManager.AddClaimAsync(user, new Claim("create_profile_link", confirmationLink));
 #endif
 
-                    await SendGmailAsync(model.Email, confirmationLink);
+                await SendGmailAsync(model.Email, confirmationLink);
 
-                    return Ok(new { Message = "User Registrated" });
-                }
-
-                _logger.LogWarning($"Registration eror - {result.Errors}");
-                return BadRequest(result.Errors);
+                return Ok(new { Message = "User Registrated" });
             }
         }
 

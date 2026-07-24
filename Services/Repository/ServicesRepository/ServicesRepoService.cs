@@ -1,14 +1,8 @@
 ﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
 using Middleware.AppoitnmentFiltrator;
-using Middleware.Mapper.ProfileDto;
 using Middleware.Mapper.ServicesDto;
-using Middleware.Repository;
-using ProfileDatabase.Models;
-using ProfileDatabase.Repository;
 using ServicesDatabase.Models;
 using ServicesDatabase.Repository;
-using System.Linq.Expressions;
 
 namespace Middleware.Repository.ServicesRepository
 {
@@ -19,7 +13,7 @@ namespace Middleware.Repository.ServicesRepository
         {
             _serviceRepo = repo;
         }
-        public List<ServiceDto> GetBySpecId(int specId)
+        virtual public List<ServiceDto> GetBySpecId(int specId)
         {
             var response = _mapper.Map<List<ServiceDto>>(_serviceRepo.GetBySpecId(specId));
 
@@ -31,7 +25,7 @@ namespace Middleware.Repository.ServicesRepository
 
             return response;
         }
-        public List<ServiceDto> GetAll(IQueryable<Service> query)
+        virtual public List<ServiceDto> GetAll(IQueryable<Service> query)
         {
             var response = _mapper.Map<List<ServiceDto>>(_serviceRepo.GetAll(query));
 
