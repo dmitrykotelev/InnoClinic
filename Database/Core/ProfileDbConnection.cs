@@ -10,6 +10,7 @@ namespace ProfileDatabase.Core
 
         public DbSet<Doctor> Doctors { get; set; }
         public DbSet<Patient> Patients { get; set; }
+        public DbSet<Reception> Receptions { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -26,9 +27,9 @@ namespace ProfileDatabase.Core
                     LastName = "Petrovich",
                     MiddleName = "Petrov",
                     DateOfBirth = new DateTime(1985, 5, 15, 0, 0, 0, DateTimeKind.Utc),
-                    AccountId = 1,
+                    AccountId = "",
                     SpecializationId = 1,
-                    OfficeId = 1,
+                    OfficeId = "",
                     CareerStartYear = new DateTime(2015, 9, 1, 0, 0, 0, DateTimeKind.Utc),
                     Status = true 
                 },
@@ -39,9 +40,9 @@ namespace ProfileDatabase.Core
                     LastName = "Davis",
                     MiddleName = "Linda",
                     DateOfBirth = new DateTime(1982, 8, 20, 0, 0, 0, DateTimeKind.Utc),
-                    AccountId = 2,
+                    AccountId = "",
                     SpecializationId = 2,
-                    OfficeId = 2, 
+                    OfficeId = "", 
                     CareerStartYear = new DateTime(2010, 8, 1, 0, 0, 0, DateTimeKind.Utc),
                     Status = true
                 },
@@ -52,9 +53,9 @@ namespace ProfileDatabase.Core
                     LastName = "Sarah",
                     MiddleName = "Elizabeth",
                     DateOfBirth = new DateTime(1990, 11, 10, 0, 0, 0, DateTimeKind.Utc),
-                    AccountId = 3,
+                    AccountId = "",
                     SpecializationId = 3,
-                    OfficeId = 1,
+                    OfficeId = "",
                     CareerStartYear = new DateTime(2020, 9, 1, 0, 0, 0, DateTimeKind.Utc),
                     Status = false  
                 }

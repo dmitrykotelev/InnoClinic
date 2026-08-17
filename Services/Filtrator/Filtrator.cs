@@ -54,7 +54,23 @@ public class Filtrator
                     }
                     break;
                 }
+            case Type t when t == typeof(DateOnly):
+                {
+                    var converter = System.ComponentModel.TypeDescriptor.GetConverter(typeof(TProperty));
+                    var convertedValue = converter.ConvertFromString(filter.Value);
+                    var searchConstant = Expression.Constant(convertedValue, typeof(TProperty));
 
+                    switch (operation)
+                    {
+                        case FilterableOperations.Equals:
+                            condition = Expression.Equal(selector.Body, searchConstant);
+                            break;
+
+                        default:
+                            break;
+                    }
+                    break;
+                }
         }
         if (condition == null)
             return null;

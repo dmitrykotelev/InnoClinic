@@ -4,10 +4,12 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Client;
+using Middleware.AppoitnmentFiltrator;
 using Middleware.Mapper.ProfileDto;
 using Middleware.Repository.ProfileRepository;
 using Middleware.Validator.ProfileValidators;
 using ProfileDatabase.Models;
+using ProfileDatabase.Repository;
 
 namespace ProfilesApi.Controllers
 {
@@ -16,6 +18,7 @@ namespace ProfilesApi.Controllers
     public class PatientController : BaseController<Patient,PatientDto>
     {
         private readonly PatientRepoService _patientRepoService;
+        static private readonly Filtrator _filtrator = new Filtrator();
         public PatientController(PatientRepoService repo, PatientValidator validator, ILogger<PatientController> logger) : base(repo, validator, logger)
         {
             _patientRepoService = repo ?? throw new ArgumentException(nameof(PatientRepoService));
@@ -75,6 +78,51 @@ namespace ProfilesApi.Controllers
 
                 _logger.LogInformation($"No profile found for AccountId: {accountId}. Returning false.");
                 return NotFound();
+            }
+        }
+
+        [HttpGet("ByGuid/{id:guid}")]
+        public async Task<IActionResult> GetById(string id)
+        {
+            using (_logger.BeginScope("Request: {id}", id))
+            {
+                var data = _repo.GetBaseQuery().FirstOrDefault(x => x.AccountId == id);
+                _logger.LogInformation($"Got GetById Request with {data.GetType().Name} by {id} ID");
+
+                if (data == null)
+                    return NotFound();
+                else
+                {
+                    _logger.LogInformation($"Founded {data.GetType().Name} by {id} ID");
+                    return Ok(data);
+                }
+            }
+        }
+
+        [HttpPost("GetAll")]
+        public async Task<IActionResult> GetAll([FromBody] List<FiltredObject> filters)
+        {
+            _logger.LogInformation($"Got GetAll request with {filters}");
+            using (_logger.BeginScope("Request: {filters}", filters))
+            {
+                if (filters == null) return BadRequest();
+                var query = _patientRepoService.GetBaseQuery();
+
+                foreach (FiltredObject filter in filters)
+                {
+                    if (string.IsNullOrWhiteSpace(filter.Value) || string.IsNullOrEmpty(filter.FieldName))
+                        continue;
+
+                    query = filter.FieldName.ToLower() switch
+                    {
+                        Filterable.Patient => _filtrator.ApplyQuery(query, x => x.FirstName, filter),
+                        _ => query
+                    };
+                }
+
+                var response = _patientRepoService.GetAll(query);
+
+                return Ok(response);
             }
         }
     }

@@ -1,8 +1,9 @@
 using DocumentsDatabase;
 using Microsoft.EntityFrameworkCore;
 using Middleware.Mapper;
-using Middleware.Minio;
 using Middleware.Repository.DocumentsRepository;
+using Middleware.Uploader;
+using Middleware.Uploader.Minio;
 using Minio;
 using Minio.AspNetCore;
 
@@ -37,7 +38,7 @@ namespace DocumentsApi
 
             builder.Services.AddTransient<PhotosRepository>();
             builder.Services.AddTransient<PhotosRepositoryService>();
-            builder.Services.AddTransient<MinioService>();
+            builder.Services.AddTransient<IFileUploadService, MinioService>();
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
@@ -58,6 +59,23 @@ namespace DocumentsApi
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            using (var scope = app.Services.CreateScope())
+            {
+                try
+                {
+                    var context = scope.ServiceProvider.GetRequiredService<DocumentsDatabase.DocumentsDbConnection>();
+
+                    context.Database.EnsureCreated();
+
+                    Console.WriteLine("\n=== БАЗА ДАННЫХ DOCUMENTS УСПЕШНО СОЗДАНА! ===\n");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"\n=== ОШИБКА СОЗДАНИЯ БАЗЫ DOCUMENTS: {ex.Message} ===\n");
+                }
+            }
+
 
             app.UseCors("AllowReactApp");
             app.UseAuthorization();

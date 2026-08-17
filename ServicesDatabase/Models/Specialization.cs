@@ -10,6 +10,6 @@ namespace ServicesDatabase.Models
         public int Id { get; set; }
         [Required]
         public string Name { get; set; }
-        public bool isActiove { get; set; }
+        public bool isActive { get; set; }
     }
 }

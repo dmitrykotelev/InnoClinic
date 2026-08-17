@@ -1,9 +1,13 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.IdentityModel.Tokens;
+using Middleware.Mapper;
+using Middleware.Repository.ProfileRepository;
 using Middleware.Validator.ProfileValidators;
 using ProfileDatabase.Core;
 using ProfileDatabase.Repository;
-using Middleware.Repository.ProfileRepository;
-using Middleware.Mapper;
+using System.IdentityModel.Tokens.Jwt;
+
 
 namespace ProfilesApi
 {
@@ -33,8 +37,10 @@ namespace ProfilesApi
             builder.Services.AddSwaggerGen();
 
             builder.Services.AddDbContext<ProfileDbConnection>(options =>
-            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
-                                 x => x.MigrationsAssembly("ProfileDatabase")));
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
+                                     x => x.MigrationsAssembly("ProfileDatabase"))
+                       .ConfigureWarnings(warnings => warnings.Ignore())
+            );
 
             builder.Services.AddAutoMapper(cfg => { }, typeof(MapperProfile).Assembly);
 
@@ -42,7 +48,58 @@ namespace ProfilesApi
             AddRepoServices(builder);
             AddValidators(builder);
 
+            // === НАСТРОЙКА АДРЕСОВ ===
+            var internalIdentityUrl = "http://identityserver:8080";
+            var externalIdentityUrl = "http://identity.inno-clinic.com";
+
+            // МЫ УДАЛИЛИ РУЧНОЕ СКАЧИВАНИЕ КЛЮЧЕЙ
+            // AddJwtBearer сделает это сам, причем элегантно и с повторными попытками
+            builder.Services.AddAuthentication("Bearer")
+                .AddJwtBearer("Bearer", options =>
+                {
+                    options.MetadataAddress = $"{internalIdentityUrl}/.well-known/openid-configuration";
+                    options.RequireHttpsMetadata = false;
+                    options.MapInboundClaims = false;
+
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateAudience = false,
+                        ValidateIssuer = false,
+                        ValidateIssuerSigningKey = false,
+                        RequireSignedTokens = false,
+
+                        RoleClaimType = "role",
+                        NameClaimType = "name",
+
+                        ValidateLifetime = true,
+                        SignatureValidator = delegate (string token, TokenValidationParameters parameters)
+                        {
+                            return new Microsoft.IdentityModel.JsonWebTokens.JsonWebToken(token);
+                        }
+                    };
+                });
+
+            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+
+            builder.Services.AddAuthorization();
+
             var app = builder.Build();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                try
+                {
+                    var context = scope.ServiceProvider.GetRequiredService<ProfileDbConnection>();
+
+                    context.Database.EnsureCreated();
+
+                    Console.WriteLine("\n=== БАЗА ДАННЫХ PROFILES УСПЕШНО СОЗДАНА! ===\n");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"\n=== ОШИБКА СОЗДАНИЯ БАЗЫ PROFILES: {ex.Message} ===\n");
+                }
+            }
 
             if (app.Environment.IsDevelopment())
             {
@@ -50,10 +107,9 @@ namespace ProfilesApi
                 app.UseSwaggerUI();
             }
 
-            app.UseHttpsRedirection();
-
             app.UseCors("AllowReactApp");
 
+            app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
 
@@ -64,18 +120,21 @@ namespace ProfilesApi
         {
             builder.Services.AddTransient<DoctorRepo>();
             builder.Services.AddTransient<PatientRepo>();
+            builder.Services.AddTransient<ReceptionRepo>();
         }
 
         private static void AddValidators(WebApplicationBuilder builder)
         {
             builder.Services.AddTransient<DoctorValidator>();
             builder.Services.AddTransient<PatientValidator>();
+            builder.Services.AddTransient<ReceptionValidator>();
         }
 
         private static void AddRepoServices(WebApplicationBuilder builder)
         {
             builder.Services.AddTransient<DoctorRepoService>();
             builder.Services.AddTransient<PatientRepoService>();
+            builder.Services.AddTransient<ReceptionRepoService>();
         }
     }
 }

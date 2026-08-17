@@ -1,25 +1,58 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import '../../styles/AppointmentModal.css';
+import '../../styles/Global.css';
 
-// --- API ЭНДПОИНТЫ ---
-const DOCTORS_API = 'http://patients.inno-clinic.com/Profile/Doctor/GetAll'; 
-const SPECS_API = 'http://services.inno-clinic.com/Specializations/GetAllFiltered';
-const SPECS_API_NOFILTERS = 'http://services.inno-clinic.com/Specializations/GetAll';
-const SERVICES_API = 'http://services.inno-clinic.com/Services/GetAll';
+const DOCTORS_API = 'https://gateway.inno-clinic.com/api-profiles/Profile/Doctor/GetAll'; 
+const SPECS_API = 'https://gateway.inno-clinic.com/api-services/Specializations/GetAllFiltered';
+const SPECS_API_NOFILTERS = 'https://gateway.inno-clinic.com/api-services/Specializations/GetAll';
+const SERVICES_API = 'https://gateway.inno-clinic.com/api-services/Services/GetAll';
+const OFFICES_API = 'https://gateway.inno-clinic.com/api-offices/Offices/GetAll';
+const CATEGORIES_API = 'https://gateway.inno-clinic.com/api-services/ServiceCategories/GetAll'; 
+const TIMESTAMPS_API = 'https://gateway.inno-clinic.com/api-appointments/Appointments/GetTimeStamps';
 
-// GET эндпоинты
-const OFFICES_API = 'http://offices.inno-clinic.com/Offices/GetAll';
-const CATEGORIES_API = 'http://services.inno-clinic.com/ServiceCategories/GetAll'; 
-const TIMESTAMPS_API = 'http://appointments.inno-clinic.com/Appointments/GetTimeStamps';
+const DEFAULT_OFFICE = [{ id: 'default-office-1', name: 'Main Clinic Office', isActive: true }];
 
-const DEFAULT_OFFICE = [{
-    id: 'default-office-1',
-    name: 'Main Clinic Office (Default)',
-    isActive: true
-}];
+const Combobox = ({ label, value, options, error, disabled, onChange, onSelect, onBlur, onFocus }) => {
+    const [isOpen, setIsOpen] = useState(false);
 
-export const AppointmentModal = ({ isLoggedIn, onRequireAuth, onSaveAppointment }) => {
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    return (
+        <div className="form-group combo-box">
+            <label>{label}</label>
+            <input 
+                type="text"
+                disabled={disabled}
+                className={`form-control ${error ? 'is-invalid' : ''}`}
+                style={{ backgroundColor: disabled ? 'var(--bg-page)' : '', cursor: disabled ? 'not-allowed' : 'text' }}
+                value={value}
+                onChange={(e) => { onChange(e.target.value); setIsOpen(true); }}
+                onFocus={() => { setIsOpen(true); if (onFocus) onFocus(); }}
+                onBlur={() => { setTimeout(() => { setIsOpen(false); onBlur(); }, 150); }}
+                placeholder={disabled ? value : `Start typing ${label.toLowerCase()}...`}
+            />
+            {isOpen && !disabled && options.length > 0 && (
+                <ul className="combo-dropdown">
+                    {options.map(opt => (
+                        <li key={opt.id} onClick={() => onSelect(opt)}>{opt.name}</li>
+                    ))}
+                </ul>
+            )}
+            {error && !disabled && <span className="error-msg">{error}</span>}
+        </div>
+    );
+};
+
+export const AppointmentModal = ({ 
+    isOpen: externalIsOpen, 
+    onClose: externalOnClose, 
+    rescheduleData, 
+    isLoggedIn = true, 
+    onRequireAuth, 
+    onSaveAppointment 
+}) => {
+    const [internalIsOpen, setInternalIsOpen] = useState(false);
+    const isModalOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
+    
+    const isRescheduling = !!rescheduleData; 
+
     const [showExitDialog, setShowExitDialog] = useState(false);
     const [isLoadingData, setIsLoadingData] = useState(false);
     
@@ -30,24 +63,20 @@ export const AppointmentModal = ({ isLoggedIn, onRequireAuth, onSaveAppointment 
     const [offices, setOffices] = useState([]);
     const [categories, setCategories] = useState([]);
 
-    const [form, setForm] = useState({
-        specialization: null,
-        doctor: null,
-        service: null,
-        office: null,
-        date: '',
-        time: ''
-    });
+    const [form, setForm] = useState({ specialization: null, doctor: null, service: null, office: null, date: '', time: '' });
     const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
     const [inputs, setInputs] = useState({ spec: '', doctor: '', service: '' });
     const [touched, setTouched] = useState({});
     const [errors, setErrors] = useState({});
 
     const searchTimers = useRef({ spec: null, doctor: null, service: null });
+    let SlotSize = 10;
 
     var SlotSize = 10;
     const fetchSpecificData = (targetField, currentInputs, currentForm) => {
         const specId = currentForm.specialization?.id || null;
+        const token = localStorage.getItem('accessToken');
+        const authHeader = token ? { 'Authorization': `Bearer ${token}` } : {};
 
         // 1. Базовый массив текстовых фильтров (без поля id)
         const payload = [
@@ -56,106 +85,102 @@ export const AppointmentModal = ({ isLoggedIn, onRequireAuth, onSaveAppointment 
             { fieldName: 'service', value: currentInputs.service || "", operation: 'contains' }
         ];
 
-        // 2. Если специализация выбрана, докидываем в массив фильтр по её ID
-        if (specId) {
-            payload.push({
-                fieldName: 'specializationId',
-                value: String(specId),
-                operation: 'equals'
-            });
-        }
+        if (specId) payload.push({ fieldName: 'specializationId', value: String(specId), operation: 'equals' });
 
         console.log(`[API] POST Запрос (массив) на обновление: ${targetField.toUpperCase()}`, payload);
 
         const requestOptions = {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', ...authHeader },
             body: JSON.stringify(payload)
         };
 
         // Отправляем массив на нужные эндпоинты
         if (targetField === 'spec' || targetField === 'all') {
-            fetch(SPECS_API, requestOptions)
-                .then(res => {
-                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                    return res.json();
-                })
-                .then(data => {
-                    if (Array.isArray(data)) {
-                        setSpecializations(data.filter(spec => spec.isActive === true || spec.isActiove === true));
+            fetch(SPECS_API, requestOptions).then(res => res.json()).then(data => {
+                if (Array.isArray(data)) setSpecializations(data.filter(spec => spec.isActive === true || spec.isActiove === true));
+            }).catch(() => {});
                     }
                 })
                 .catch(err => console.error("Specs API Error:", err));
         }
 
         if (targetField === 'doctor' || targetField === 'all') {
-            fetch(DOCTORS_API, requestOptions)
-                .then(res => {
-                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                    return res.json();
-                })
-                .then(data => {
-                    if (Array.isArray(data)) {
-                        setDoctors(data.filter(doc => doc.status === true || doc.status === 'At work'));
+            fetch(DOCTORS_API, requestOptions).then(res => res.json()).then(data => {
+                if (Array.isArray(data)) setDoctors(data.filter(doc => doc.status === true || doc.status === 'At work'));
+            }).catch(() => {});
                     }
                 })
                 .catch(err => console.error("Doctors API Error:", err));
         }
 
         if (targetField === 'service' || targetField === 'all') {
-            fetch(SERVICES_API, requestOptions)
-                .then(res => {
-                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                    return res.json();
-                })
-                .then(data => {
-                    if (Array.isArray(data)) {
-                        setServices(data.filter(serv => serv.isActive === true || serv.status === true));
+            fetch(SERVICES_API, requestOptions).then(res => res.json()).then(data => {
+                if (Array.isArray(data)) setServices(data.filter(serv => serv.isActive === true || serv.status === true));
+            }).catch(() => {});
                     }
                 })
                 .catch(err => console.error("Services API Error:", err));
         }
     };
-    // --- ЗАГРУЗКА ПРИ ОТКРЫТИИ ОКНА ---
+
     useEffect(() => {
         if (isModalOpen) {
             setIsLoadingData(true);
+            const token = localStorage.getItem('accessToken');
+            const authHeader = token ? { 'Authorization': `Bearer ${token}` } : {};
             
-            fetchSpecificData('all', inputs, form);
-
-            fetch(OFFICES_API)
-                .then(res => res.json())
-                .then(data => {
-                    const activeOffices = data.filter(off => off.isActive === true || off.status === true);
+            Promise.all([
+                fetch(SPECS_API_NOFILTERS, { headers: authHeader }).then(r => r.json()).catch(() => []),
+                fetch(DOCTORS_API, { method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeader }, body: JSON.stringify([]) }).then(r => r.json()).catch(() => []),
+                fetch(SERVICES_API, { method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeader }, body: JSON.stringify([]) }).then(r => r.json()).catch(() => []),
+                fetch(OFFICES_API, { headers: authHeader }).then(r => r.json()).catch(() => []),
+                fetch(CATEGORIES_API, { headers: authHeader }).then(r => r.json()).catch(() => [])
+            ]).then(([specsList, docsList, servsList, offsList, catsList]) => {
+                const activeOffices = offsList.filter(o => o.isActive === true || o.status === true);
                     setOffices(activeOffices.length > 0 ? activeOffices : DEFAULT_OFFICE);
-                })
-                .catch(() => setOffices(DEFAULT_OFFICE));
+                setCategories(catsList);
 
-            fetch(CATEGORIES_API)
-                .then(res => {
-                    if (!res.ok) throw new Error("Failed to fetch categories");
-                    return res.json();
-                })
-                .then(data => {
-                    setCategories(data);
-                })
-                .catch(err => console.error("Категории не загрузились:", err));
+                if (rescheduleData) {
+                    const tService = servsList.find(s => s.id === rescheduleData.serviceId || s.Id === rescheduleData.serviceId);
+                    const tDoctor = docsList.find(d => d.id === rescheduleData.doctorId || d.Id === rescheduleData.doctorId);
+                    const tSpec = specsList.find(s => String(s.id) === String(tService?.specializationId || tDoctor?.specializationId));
+                    const tOffice = activeOffices.find(o => String(o.id) === String(tDoctor?.officeId || tDoctor?.OfficeId));
 
+                    setForm({
+                        specialization: tSpec || null,
+                        service: tService || null,
+                        office: tOffice || null,
+                        doctor: tDoctor || null,
+                        date: rescheduleData.date || rescheduleData.Date || '',
+                        time: (rescheduleData.time || rescheduleData.Time || '').substring(0, 5)
+                    });
+
+                    setInputs({
+                        spec: tSpec?.name || tSpec?.Name || '',
+                        service: tService?.name || tService?.serviceName || '',
+                        doctor: tDoctor ? `${tDoctor.lastName} ${tDoctor.firstName}` : ''
+                    });
+
+                    setDoctors(docsList.filter(d => d.status === true || d.status === 'At work'));
+                } else {
+                    fetchSpecificData('all', inputs, form);
+                }
             setIsLoadingData(false);
+            });
         } else {
             setForm({ specialization: null, doctor: null, service: null, office: null, date: '', time: '' });
             setInputs({ spec: '', doctor: '', service: '' });
-            setTouched({});
-            setErrors({});
-            setAvailableTimeSlots([]);
+            setTouched({}); setErrors({}); setAvailableTimeSlots([]);
         }
-    }, [isModalOpen]);
+    }, [isModalOpen, rescheduleData]);
 
     // Обработчик изменения текста (Ввод пользователя + каскадная очистка)
     const handleComboChange = (field, textValue) => {
+        if (isRescheduling && field !== 'doctor') return;
         let nextInputs = { ...inputs, [field]: textValue };
         const formField = field === 'spec' ? 'specialization' : field;
-        let nextForm = { ...form };
+        let nextForm = { ...form, [formField]: null, date: '', time: '' };
 
         if (form[formField] !== null) {
             nextForm[formField] = null; 
@@ -164,7 +189,7 @@ export const AppointmentModal = ({ isLoggedIn, onRequireAuth, onSaveAppointment 
                 nextInputs.doctor = ''; nextForm.doctor = null;
                 nextInputs.service = ''; nextForm.service = null;
                 nextForm.office = null;
-            } else if (field === 'doctor') {
+        } else if (field === 'doctor' && !isRescheduling) {
                 nextInputs.service = ''; nextForm.service = null;
                 nextForm.office = null;
             } 
@@ -172,79 +197,34 @@ export const AppointmentModal = ({ isLoggedIn, onRequireAuth, onSaveAppointment 
             nextForm.time = '';
             setAvailableTimeSlots([]);
             
-            setErrors({}); 
-        } else {
-            nextForm[formField] = null;
-        }
+        setAvailableTimeSlots([]); setErrors({}); 
+        setInputs(nextInputs); setForm(nextForm);
 
-        setInputs(nextInputs);
-        setForm(nextForm);
-
-        if (searchTimers.current[field]) {
-            clearTimeout(searchTimers.current[field]);
-        }
-
-        searchTimers.current[field] = setTimeout(() => {
-            fetchSpecificData('all', nextInputs, nextForm);
-        }, 300);
+        if (searchTimers.current[field]) clearTimeout(searchTimers.current[field]);
+        searchTimers.current[field] = setTimeout(() => fetchSpecificData('all', nextInputs, nextForm), 300);
     };
 
     // --- ОБРАБОТЧИК ВЫБОРА ИЗ СПИСКА ---
     // --- ОБРАБОТЧИК ВЫБОРА ИЗ СПИСКА ---
     const handleComboSelect = async (field, item) => {
+        if (isRescheduling && field !== 'doctor') return;
         let nextInputs = { ...inputs, [field]: item.name || `${item.lastName} ${item.firstName}` };
         const formField = field === 'spec' ? 'specialization' : field;
         let nextForm = { ...form, [formField]: item };
 
-        // 1. Автоматический подбор Офиса (ТОЛЬКО для доктора)
-        if (field === 'doctor' && item.officeId) {
-            const docOffice = offices.find(o => String(o.id) === String(item.officeId));
-            if (docOffice) {
-                nextForm.office = docOffice;
-            }
-        }
-
-        // 2. Автоматический подбор Специализации (ДЛЯ ДОКТОРА И ДЛЯ УСЛУГИ)
-        if ((field === 'doctor' || field === 'service') && item.specializationId) {
-            
-            // ДЕЛАЕМ АВТОПОДБОР ТОЛЬКО ЕСЛИ СПЕЦИАЛИЗАЦИЯ ЕЩЕ НЕ ВЫБРАНА ИЛИ ОТЛИЧАЕТСЯ
-            if (!nextForm.specialization || String(nextForm.specialization.id) !== String(item.specializationId)) {
-                
-                const autoPayload = [
-                    // Фильтр для строгого поиска самой специализации по её первичному ключу 'id'
-                    { fieldName: 'id', value: String(item.specializationId), operation: 'equals' },
-                    
-                    // Текстовые фильтры (без передачи id)
-                    { fieldName: 'doctor', value: nextInputs.doctor || "", operation: 'contains' },
-                    { fieldName: 'service', value: nextInputs.service || "", operation: 'contains' },
-                    
-                    // Фильтр-связка: искать врачей и услуги только с этим specializationId
-                    { fieldName: 'specializationId', value: String(item.specializationId), operation: 'equals' }
-                ];
-
-                const requestOptions = {
-                    method: 'GET',
-                    headers: { 'Content-Type': 'application/json' }
-                };
-
-                try {
-                    const res = await fetch(SPECS_API_NOFILTERS, requestOptions);
-                    if (res.ok) {
-                        const data = await res.json();
-                        
-                        if (Array.isArray(data) && data.length > 0) {
-                            const fetchedSpec = data.find(s => String(s.id) === String(item.specializationId));
-                            
-                            if (fetchedSpec) {
-                                nextInputs.spec = fetchedSpec.name;
-                                nextForm.specialization = fetchedSpec;
+        if (field === 'doctor' && !isRescheduling) {
+            if (item.officeId || item.OfficeId) {
+                const docOfficeId = item.officeId || item.OfficeId;
+                const docOffice = offices.find(o => String(o.id) === String(docOfficeId));
+                if (docOffice) nextForm.office = docOffice;
                             }
                             
-                            setSpecializations(data);
-                        }
-                    }
-                } catch (err) {
-                    console.error("Ошибка при автоматическом получении специализации:", err);
+            const specId = item.specializationId || item.SpecializationId;
+            if (specId) {
+                const docSpec = specializations.find(s => String(s.id) === String(specId));
+                if (docSpec) {
+                    nextForm.specialization = docSpec;
+                    nextInputs.spec = docSpec.name || docSpec.Name;
                 }
             }
         }
@@ -254,44 +234,27 @@ export const AppointmentModal = ({ isLoggedIn, onRequireAuth, onSaveAppointment 
         setForm(nextForm);
         setErrors(prev => ({ ...prev, [field]: null }));
 
-        // 3. Перекрестное обновление соседних списков
-        if (field === 'doctor') {
-            fetchSpecificData('service', nextInputs, nextForm);
-        } else if (field === 'service') {
-            fetchSpecificData('doctor', nextInputs, nextForm);
+        if (!isRescheduling) {
+            if (field === 'doctor') fetchSpecificData('service', nextInputs, nextForm);
+            else if (field === 'service') fetchSpecificData('doctor', nextInputs, nextForm);
         }
     };
 
     const handleBlur = (field) => setTouched(prev => ({ ...prev, [field]: true }));
-    
-    const handleComboFocus = (field) => {
-        fetchSpecificData(field, inputs, form);
-    };
+    const handleComboFocus = (field) => { if (!isRescheduling || field === 'doctor') fetchSpecificData(field, inputs, form); };
 
     // --- ЛОГИКА 2: ГЕНЕРАЦИЯ ТАЙМ-СЛОТОВ ---
     const getRequiredSlotsCount = (service) => {
-        if (!service) return 0;
+        if (!service) return 1;
         const catId = service.categoryId || service.serviceCategoryId; 
         if (!catId) return 1; 
 
         const category = categories.find(c => c.id === catId);
-        if (!category) return 1; 
-
-        const catName = category.name.toLowerCase();
+        const catName = category?.name?.toLowerCase() || '';
         
-        if (catName.includes('diagnostic')) {
-            SlotSize = 30;
-            return 3
-        }; 
-        if (catName.includes('consultation')) {
-            SlotSize = 20;
-            return 2
-        }; 
-        if (catName.includes('analys')) {
-            SlotSize = 10;
-            return 1
-        };    
-        
+        if (catName.includes('diagnostic')) { SlotSize = 30; return 3; } 
+        if (catName.includes('consultation')) { SlotSize = 20; return 2; } 
+        if (catName.includes('analys')) { SlotSize = 10; return 1; }   
         return 1; 
     };
 
@@ -313,31 +276,12 @@ export const AppointmentModal = ({ isLoggedIn, onRequireAuth, onSaveAppointment 
 
     useEffect(() => {
         if (form.doctor?.id && form.date) {
-            console.log(`[API] POST Запрос свободных слотов для Доктора №${form.doctor.id} на дату ${form.date}`);
-            
-            const requestOptions = {
+            const token = localStorage.getItem('accessToken');
+            fetch(TIMESTAMPS_API, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    doctorId: form.doctor.id,
-                    date: form.date,
-                    SlotSize: SlotSize
-                })
-            };
-
-            fetch(TIMESTAMPS_API, requestOptions)
-                .then(res => {
-                    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-                    return res.json();
-                })
-                .then(data => {
-                    setAvailableTimeSlots(data);
-                    console.log("[Расписание] Получены свободные слоты:", data);
-                })
-                .catch(err => {
-                    console.error("Ошибка при получении свободных слотов:", err);
-                    setAvailableTimeSlots([]);
-                });
+                headers: { 'Content-Type': 'application/json', ...(token ? { 'Authorization': `Bearer ${token}` } : {}) },
+                body: JSON.stringify({ doctorId: form.doctor.id, date: form.date, SlotSize: SlotSize })
+            }).then(res => res.json()).then(data => setAvailableTimeSlots(data)).catch(() => setAvailableTimeSlots([]));
         } else {
             setAvailableTimeSlots([]);
         }
@@ -347,11 +291,9 @@ export const AppointmentModal = ({ isLoggedIn, onRequireAuth, onSaveAppointment 
     const getEndTime = (startTime, slotsCount) => {
         const [hours, minutes] = startTime.split(':').map(Number);
         const totalMinutes = hours * 60 + minutes + (slotsCount * 10);
-        const endHours = Math.floor(totalMinutes / 60);
-        const endMins = totalMinutes % 60;
-        return `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
+        return `${Math.floor(totalMinutes / 60).toString().padStart(2, '0')}:${(totalMinutes % 60).toString().padStart(2, '0')}`;
     };
-    // --- ВАЛИДАЦИЯ ---
+
     useEffect(() => {
         const newErrors = {};
         if (touched.spec && !form.specialization) newErrors.spec = "Invalid specialization name";
@@ -364,14 +306,18 @@ export const AppointmentModal = ({ isLoggedIn, onRequireAuth, onSaveAppointment 
         setErrors(newErrors);
     }, [form, inputs, touched]);
 
-    const isFormValid = () => {
-        return form.specialization && form.doctor && form.service && form.office && form.date && form.time && Object.keys(errors).length === 0;
+    const isFormValid = () => form.specialization && form.doctor && form.service && form.office && form.date && form.time && Object.keys(errors).length === 0;
+    const isDateTimeEnabled = !!(form.specialization && form.service && form.office);
+
+    const closeHandler = () => {
+        if (externalOnClose) externalOnClose();
+        else setInternalIsOpen(false);
     };
 
     const isDateTimeEnabled = !!(form.specialization && form.service && form.office);
 
     const handleCloseClick = () => setShowExitDialog(true);
-    const handleExitConfirm = () => { setShowExitDialog(false); setIsModalOpen(false); };
+    const handleExitConfirm = () => { setShowExitDialog(false); closeHandler(); };
     const handleExitCancel = () => setShowExitDialog(false);
 
     const handleConfirmSubmit = () => {
@@ -382,31 +328,34 @@ export const AppointmentModal = ({ isLoggedIn, onRequireAuth, onSaveAppointment 
         }
         if (isFormValid()) {
             onSaveAppointment && onSaveAppointment(form);
-            setIsModalOpen(false);
+            closeHandler();
         }
     };
 
     return (
         <div className="appointment-wrapper">
-            <button className="btn-action" onClick={() => setIsModalOpen(true)}>
+            {externalIsOpen === undefined && (
+                <button className="btn-action" onClick={() => setInternalIsOpen(true)}>
                 ➕ Appointment
             </button>
+            )}
 
             {isModalOpen && (
                 <div className="modal-overlay">
-                    <div className="appointment-modal">
+                    <div className="modal-card md">
                         <div className="modal-header">
-                            <h2>Create Appointment</h2>
+                            <h2>{isRescheduling ? 'Reschedule Appointment' : 'Create Appointment'}</h2>
                             <button className="btn-close" onClick={handleCloseClick}>&times;</button>
                         </div>
 
                         <div className="modal-body">
                             {isLoadingData ? (
-                                <div style={{ textAlign: 'center', padding: '40px' }}>Loading data...</div>
+                                <div className="empty-state">Loading data...</div>
                             ) : (
                                 <>
                                     <Combobox 
                                         label="Specialization"
+                                        disabled={isRescheduling}
                                         value={inputs.spec}
                                         options={specializations}
                                         error={errors.spec}
@@ -418,6 +367,7 @@ export const AppointmentModal = ({ isLoggedIn, onRequireAuth, onSaveAppointment 
 
                                     <Combobox 
                                         label="Doctor"
+                                        disabled={false}
                                         value={inputs.doctor}
                                         options={doctors.map(d => ({...d, name: `${d.lastName} ${d.firstName}`}))}
                                         error={errors.doctor}
@@ -429,6 +379,7 @@ export const AppointmentModal = ({ isLoggedIn, onRequireAuth, onSaveAppointment 
 
                                     <Combobox 
                                         label="Service"
+                                        disabled={isRescheduling}
                                         value={inputs.service}
                                         options={services}
                                         error={errors.service}
@@ -442,6 +393,8 @@ export const AppointmentModal = ({ isLoggedIn, onRequireAuth, onSaveAppointment 
                                         <label>Office</label>
                                         <select 
                                             className={`form-control ${errors.office ? 'is-invalid' : ''}`}
+                                            disabled={isRescheduling}
+                                            style={{ backgroundColor: isRescheduling ? 'var(--bg-page)' : '', cursor: isRescheduling ? 'not-allowed' : 'pointer' }}
                                             value={form.office?.id || ''}
                                             onChange={(e) => {
                                                 const selected = offices.find(o => String(o.id) === String(e.target.value));
@@ -454,7 +407,7 @@ export const AppointmentModal = ({ isLoggedIn, onRequireAuth, onSaveAppointment 
                                                 <option key={o.id} value={o.id}>{o.name || `Office ${o.adress}`}</option>
                                             ))}
                                         </select>
-                                        {errors.office && <span className="error-msg">{errors.office}</span>}
+                                        {errors.office && !isRescheduling && <span className="error-msg">{errors.office}</span>}
                                     </div>
 
                                     <div className="form-group">
@@ -465,26 +418,24 @@ export const AppointmentModal = ({ isLoggedIn, onRequireAuth, onSaveAppointment 
                                             disabled={!isDateTimeEnabled}
                                             min={new Date().toISOString().split('T')[0]}
                                             value={form.date}
+                                            onClick={(e) => e.target.showPicker && e.target.showPicker()}
+                                            
                                             onChange={(e) => {
                                                 setForm(prev => ({ ...prev, date: e.target.value, time: '' }));
                                                 setErrors(prev => ({...prev, date: null})); 
                                             }}
                                             onBlur={() => handleBlur('date')}
                                         />
-                                        {errors.date && <span className="error-msg" style={{color: 'red', fontSize: '12px'}}>{errors.date}</span>}
+                                        {errors.date && <span className="error-msg">{errors.date}</span>}
                                     </div>
 
                                     <div className="form-group">
                                         <label>Time Slots {form.service && `(Requires ${getRequiredSlotsCount(form.service) * 10} min)`}</label>
-                                        <div 
-                                            className={`time-slots-grid ${!form.date ? 'disabled' : ''} ${errors.time ? 'is-invalid-grid' : ''}`}
-                                            tabIndex={0}
-                                            onBlur={() => handleBlur('time')}
-                                        >
+                                        <div className={`time-slots-grid ${!form.date ? 'disabled' : ''}`} tabIndex={0} onBlur={() => handleBlur('time')}>
                                             {!form.date ? (
-                                                <div className="empty-state">Please select a date first</div>
+                                                <div className="empty-state" style={{gridColumn: '1 / -1', padding: '20px'}}>Please select a date first</div>
                                             ) : availableTimeSlots.length === 0 ? (
-                                                <div className="empty-state" style={{color: 'red'}}>No free time slots on this date</div>
+                                                <div className="empty-state" style={{gridColumn: '1 / -1', padding: '20px', color: 'var(--error-color)'}}>No free time slots</div>
                                             ) : (
                                                 availableTimeSlots.map(slot => {
                                                     // Отрезаем секунды, получаем "09:00"
@@ -507,33 +458,28 @@ export const AppointmentModal = ({ isLoggedIn, onRequireAuth, onSaveAppointment 
                                                 })
                                             )}
                                         </div>
-                                        {errors.time && <span className="error-msg" style={{color: 'red', fontSize: '12px'}}>{errors.time}</span>}
+                                        {errors.time && <span className="error-msg">{errors.time}</span>}
                                     </div>
                                 </>
                             )}
                         </div>
 
                         <div className="modal-footer">
-                            <button 
-                                className="btn-confirm" 
-                                disabled={!isFormValid() || isLoadingData} 
-                                onClick={handleConfirmSubmit}
-                            >
-                                Confirm
-                            </button>
+                            <button className="btn btn-secondary" onClick={handleCloseClick}>Cancel</button>
+                            <button className="btn btn-primary" disabled={!isFormValid() || isLoadingData} onClick={handleConfirmSubmit}>Confirm</button>
                         </div>
                     </div>
                 </div>
             )}
 
             {showExitDialog && (
-                <div className="modal-overlay dialog-overlay">
-                    <div className="dialog-modal">
-                        <p>Do you really want to exit? Your appointment will not be saved.</p>
-                        <div className="dialog-actions">
-                            <button className="btn-yes" onClick={handleExitConfirm}>Yes</button>
-                            <button className="btn-no" onClick={handleExitCancel}>No</button>
-                        </div>
+                <div className="modal-overlay top-tier">
+                    <div className="modal-card sm">
+                        <h3 className="mb-3">Cancel Edit?</h3>
+                        <p className="mb-4">Do you really want to cancel? Entered data won’t be saved.</p>
+                        <div className="flex-row" style={{justifyContent: 'center'}}>
+                            <button className="btn btn-primary" onClick={handleExitConfirm}>Yes</button>
+                            <button className="btn btn-secondary" onClick={handleExitCancel}>No</button>
                     </div>
                 </div>
             )}

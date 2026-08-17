@@ -28,8 +28,7 @@ namespace OfficesDatabase.Core
                     },
                     new Office
                     {
-                        Id = 2,
-                        Adress = "Peter",
+                        Adress = "St.Petersburg",
                         PhotoId = Guid.NewGuid(),
                         PhoneNumber = "+7 (812) 765-43-21",
                         IsActive = true

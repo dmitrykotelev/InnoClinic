@@ -1,5 +1,7 @@
 using Duende.IdentityServer.Models;
+using IdentityServer.Database;
 using IdentityServer.Helpers;
+using IdentityServer.IdentityServices;
 using IdentityServer.Settings;
 using IdentityServerDatabase;
 using IdentityServerDatabase.Models;
@@ -19,6 +21,7 @@ namespace IdentityServer
                     new IdentityResources.OpenId(),
                     new IdentityResources.Profile(),
                     new IdentityResources.Email(),
+                    new IdentityResource("roles", "User roles", new[] { ScopesConfig.Role }),
                     new IdentityResources.Phone(),
                     new IdentityResource(
                         name: "custom_profile",
@@ -29,14 +32,13 @@ namespace IdentityServer
             public static IEnumerable<ApiScope> ApiScopes =>
                 new ApiScope[]
                 {
-                    new ApiScope(ScopesConfig.ApiScope, "My API")
+                    new ApiScope(ScopesConfig.ApiScope, "My API", new[] { ScopesConfig.Role})
                 };
         }
 
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
 
             //////////////
             /// DuendeServer
@@ -51,6 +53,12 @@ namespace IdentityServer
             builder.Services.AddHttpContextAccessor();
 
             builder.Services.AddTransient<Duende.IdentityServer.IdentityServerTools>();
+
+            // ИСПРАВЛЕНИЕ 1: Внутренний адрес контейнера ProfilesApi в сети Docker
+            builder.Services.AddHttpClient("ProfilesApi", client =>
+            {
+                client.BaseAddress = new Uri("http://profilesapi:8080");
+            });
 
             var corsSettings = builder.Configuration.GetSection("CorsSettings").Get<CorsSettings>();
             builder.Services.AddCors(options =>
@@ -69,6 +77,30 @@ namespace IdentityServer
             SwaggerConfiguration(builder);
 
             var app = builder.Build();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                try
+                {
+                    var context = services.GetRequiredService<IdentityDbConnection>();
+
+                    Console.WriteLine("\n=== [1/3] Ожидание SQL Server... ===");
+                    Thread.Sleep(3000);
+
+                    Console.WriteLine("=== [2/3] Создание базы IdentityDb (EnsureCreated)... ===");
+                    context.Database.EnsureCreated();
+
+                    Console.WriteLine("=== [3/3] Добавление базовых ролей... ===");
+                    IdentityServer.Database.DatabaseSeeder.SeedRolesAsync(services).GetAwaiter().GetResult();
+
+                    Console.WriteLine("=== ГОТОВО! IDENTITY ИНИЦИАЛИЗИРОВАН! ===\n");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"\n=== ФАТАЛЬНАЯ ОШИБКА ИНИЦИАЛИЗАЦИИ IDENTITY ===\n{ex.Message}\n{ex.StackTrace}\n");
+                }
+            }
 
             app.UseStaticFiles();
             app.UseRouting();
@@ -136,7 +168,6 @@ namespace IdentityServer
                 .Get<ClientsConfig>();
             var clients = IdentityConfigHelper.GetClients(clientConfig ?? new ClientsConfig());
 
-
             builder.Services.AddDbContext<IdentityDbConnection>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -155,11 +186,18 @@ namespace IdentityServer
 
             builder.Services.AddIdentityServer(options =>
             {
+                // ИСПРАВЛЕНИЕ 3: Отключаем запись ключей на жесткий диск
+                // Это устраняет ошибку UnauthorizedAccessException в /app/keys/
+                options.KeyManagement.Enabled = false;
+
                 options.Events.RaiseErrorEvents = true;
                 options.Events.RaiseInformationEvents = true;
                 options.Events.RaiseFailureEvents = true;
                 options.Events.RaiseSuccessEvents = true;
                 options.EmitStaticAudienceClaim = true;
+
+                // Внешний адрес оставляем без изменений, так как он идет в токены
+                options.IssuerUri = "http://identity.inno-clinic.com";
 
                 options.Authentication.CookieSameSiteMode = SameSiteMode.Lax;
             })
@@ -167,7 +205,8 @@ namespace IdentityServer
             .AddInMemoryApiScopes(Config.ApiScopes)
             .AddInMemoryClients(clients)
             .AddAspNetIdentity<AppUser>()
-            .AddProfileService<ProfileService>();
+            .AddProfileService<ProfileService>()
+            .AddDeveloperSigningCredential(); // Генерируем ключ прямо в памяти
 
             builder.Services.ConfigureApplicationCookie(options =>
             {

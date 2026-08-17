@@ -73,7 +73,7 @@ namespace BaseModules.DatabaseClasses
         {
             return _dbSet.Count();
         }
-        private bool Save()
+        protected bool Save()
         {
             var status = _context.SaveChanges();
             if (status != 0)

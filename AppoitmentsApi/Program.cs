@@ -1,5 +1,7 @@
+using AppointmentsApi.Services;
 using AppoitmentsDatabase;
 using AppoitmentsDatabase.Core;
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using Middleware.Mapper;
 using Middleware.Repository.AppoitmentsRepository;
@@ -40,7 +42,31 @@ namespace AppoitmentsApi
             builder.Services.AddTransient<AppoitmentRepoService>();
             builder.Services.AddTransient<AppointmentsValidator>();
 
+            builder.Services.AddTransient<AppointmentsResultRepository>();
+            builder.Services.AddTransient<AppoitmentResultRepoService>();
+            builder.Services.AddTransient<AppointmentsResultValidator>();
+
+            builder.Services.AddTransient<ResultPdfGenerator>();
+
+            builder.Services.AddHttpClient();
+
             var app = builder.Build();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                try
+                {
+                    var context = scope.ServiceProvider.GetRequiredService<AppoitmentsDatabase.Core.AppoitmentDbContext>();
+
+                    context.Database.EnsureCreated();
+
+                    Console.WriteLine("\n=== БАЗА ДАННЫХ APPOINTMENTS УСПЕШНО СОЗДАНА! ===\n");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"\n=== ОШИБКА СОЗДАНИЯ БАЗЫ APPOINTMENTS: {ex.Message} ===\n");
+                }
+            }
 
             if (app.Environment.IsDevelopment())
             {

@@ -291,4 +291,255 @@
     background-color: #E30613; /* Red */
     color: #ffffff; /* White */
     border-color: #E30613;
+}/* Переиспользуем анимацию и базовый контейнер */
+.doctor-profile-container {
+    max-width: 1152px;
+    margin: 0 auto;
+    padding: 24px;
+    animation: fadeIn 0.5s ease-in-out;
+    font-family: system-ui, -apple-system, sans-serif;
+    color: #333333;
+}
+
+/* Переиспользуем кнопку "Назад" из хедера */
+.btn-back {
+    font-size: 14px;
+    color: #666666;
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-bottom: 24px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0;
+}
+
+.btn-back:hover {
+    text-decoration: underline;
+    color: #000000;
+}
+
+/* Адаптированный .doctor-card для большого профиля */
+.doctor-info-card {
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+@media (min-width: 768px) {
+    .doctor-info-card {
+        flex-direction: row; /* На десктопе фото слева, текст справа */
+        align-items: flex-start;
+    }
+}
+
+/* Увеличенное фото на базе .doctor-photo */
+.doctor-photo-wrapper {
+    flex-shrink: 0;
+    text-align: center;
+}
+
+.profile-photo {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    border: 4px solid #f5f5f5;
+    object-fit: cover;
+}
+
+.photo-placeholder {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background-color: #f5f5f5;
+    border: 2px dashed #cccccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666666;
+    font-weight: 500;
+}
+
+/* Блок с текстом */
+.doctor-details {
+    flex-grow: 1;
+}
+
+/* На базе .doctor-name и .doctor-spec */
+.profile-name {
+    font-size: 28px;
+    font-weight: bold;
+    color: #000000;
+    margin: 0 0 8px 0;
+}
+
+.profile-spec {
+    color: #E30613; /* Innowise Red */
+    font-size: 16px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 24px 0;
+}
+
+/* На базе .doctor-info-divider и .doctor-info-row */
+.profile-info-divider {
+    border-top: 1px solid #e5e7eb;
+    padding-top: 24px;
+    margin-bottom: 24px;
+}
+
+.profile-info-row {
+    display: flex;
+    align-items: baseline;
+    font-size: 16px;
+    margin-bottom: 12px;
+}
+
+.profile-info-label {
+    color: #666666;
+    min-width: 140px;
+    font-weight: 500;
+}
+
+.profile-info-value {
+    font-weight: bold;
+    color: #333333;
+}
+
+.profile-services ul {
+    margin: 8px 0 0 0;
+    padding-left: 20px;
+    color: #333333;
+}
+
+.profile-services li {
+    margin-bottom: 6px;
+}
+
+/* Кнопка записи (переиспользуем стиль .btn-enter) */
+.btn-make-appointment {
+    margin-top: 24px;
+    padding: 12px 24px;
+    background-color: #E30613;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: background-color 0.2s;
+    width: 100%;
+    max-width: 320px;
+}
+
+.btn-make-appointment:hover {
+    background-color: #B30000;
+}
+
+/* --- Стили модального окна записи --- */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.modal-content {
+    background-color: #ffffff;
+    padding: 32px;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 450px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.modal-content h3 {
+    margin: 0 0 24px 0;
+    color: #000000;
+    font-size: 20px;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #666666;
+    font-weight: 500;
+}
+
+/* Переиспользуем стиль .filter-input */
+.form-group input {
+    padding: 10px;
+    border: 1px solid #cccccc;
+    border-radius: 6px;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.form-group input:focus {
+    border-color: #E30613;
+    box-shadow: 0 0 0 2px rgba(227, 6, 19, 0.2);
+}
+
+.form-group input.prefilled-input {
+    background-color: #f5f5f5;
+    color: #666666;
+    cursor: not-allowed;
+    border-color: #e5e7eb;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 32px;
+}
+
+/* Кнопка отмены на базе .btn-book */
+.btn-modal-cancel {
+    padding: 10px 20px;
+    background-color: #f5f5f5;
+    color: #000000;
+    font-weight: bold;
+    border-radius: 8px;
+    border: 1px solid #cccccc;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-modal-cancel:hover {
+    background-color: #e5e7eb;
+}
+
+/* Кнопка подтверждения на базе .btn-enter */
+.btn-modal-confirm {
+    padding: 10px 20px;
+    background-color: #E30613;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-modal-confirm:hover {
+    background-color: #B30000;
 }

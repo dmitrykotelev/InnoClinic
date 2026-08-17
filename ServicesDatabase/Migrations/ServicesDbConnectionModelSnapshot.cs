@@ -31,7 +31,10 @@ namespace ServicesDatabase.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<float>("Price")
+                        .HasColumnType("real");
 
                     b.Property<int>("ServiceCategoryId")
                         .HasColumnType("int");
@@ -44,6 +47,8 @@ namespace ServicesDatabase.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex(new[] { "Name" }, "Service_Name");
+
                     b.ToTable("Services");
 
                     b.HasData(
@@ -51,6 +56,7 @@ namespace ServicesDatabase.Migrations
                         {
                             Id = 1,
                             Name = "Cardiologist Initial",
+                            Price = 0f,
                             ServiceCategoryId = 1,
                             SpecializationId = 1,
                             isActive = true
@@ -59,6 +65,7 @@ namespace ServicesDatabase.Migrations
                         {
                             Id = 2,
                             Name = "Cardiologist Follow-up",
+                            Price = 0f,
                             ServiceCategoryId = 1,
                             SpecializationId = 1,
                             isActive = true
@@ -67,6 +74,7 @@ namespace ServicesDatabase.Migrations
                         {
                             Id = 3,
                             Name = "Neurologist Initial",
+                            Price = 0f,
                             ServiceCategoryId = 1,
                             SpecializationId = 2,
                             isActive = true
@@ -75,6 +83,7 @@ namespace ServicesDatabase.Migrations
                         {
                             Id = 4,
                             Name = "Surgeon Consultation",
+                            Price = 0f,
                             ServiceCategoryId = 1,
                             SpecializationId = 3,
                             isActive = false
@@ -83,6 +92,7 @@ namespace ServicesDatabase.Migrations
                         {
                             Id = 5,
                             Name = "X-Ray Chest",
+                            Price = 0f,
                             ServiceCategoryId = 2,
                             SpecializationId = 4,
                             isActive = true
@@ -91,6 +101,7 @@ namespace ServicesDatabase.Migrations
                         {
                             Id = 6,
                             Name = "MRI Brain",
+                            Price = 0f,
                             ServiceCategoryId = 2,
                             SpecializationId = 4,
                             isActive = true
@@ -99,6 +110,7 @@ namespace ServicesDatabase.Migrations
                         {
                             Id = 7,
                             Name = "Ultrasound Abdomen",
+                            Price = 0f,
                             ServiceCategoryId = 2,
                             SpecializationId = 4,
                             isActive = false
@@ -107,6 +119,7 @@ namespace ServicesDatabase.Migrations
                         {
                             Id = 8,
                             Name = "Complete Blood Count",
+                            Price = 0f,
                             ServiceCategoryId = 3,
                             SpecializationId = 5,
                             isActive = true
@@ -115,6 +128,7 @@ namespace ServicesDatabase.Migrations
                         {
                             Id = 9,
                             Name = "Lipid Panel",
+                            Price = 0f,
                             ServiceCategoryId = 3,
                             SpecializationId = 5,
                             isActive = true
@@ -123,6 +137,7 @@ namespace ServicesDatabase.Migrations
                         {
                             Id = 10,
                             Name = "Vitamin D",
+                            Price = 0f,
                             ServiceCategoryId = 3,
                             SpecializationId = 5,
                             isActive = false
@@ -179,12 +194,14 @@ namespace ServicesDatabase.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
-                    b.Property<bool>("isActiove")
+                    b.Property<bool>("isActive")
                         .HasColumnType("bit");
 
                     b.HasKey("Id");
+
+                    b.HasIndex(new[] { "Name" }, "Specialization_Name");
 
                     b.ToTable("Specializations");
 
@@ -193,19 +210,19 @@ namespace ServicesDatabase.Migrations
                         {
                             Id = 1,
                             Name = "General Therapy",
-                            isActiove = true
+                            isActive = true
                         },
                         new
                         {
                             Id = 2,
                             Name = "Cardiology",
-                            isActiove = true
+                            isActive = true
                         },
                         new
                         {
                             Id = 3,
                             Name = "Dentistry",
-                            isActiove = true
+                            isActive = true
                         });
                 });
 #pragma warning restore 612, 618

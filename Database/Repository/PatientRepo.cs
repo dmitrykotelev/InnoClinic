@@ -34,5 +34,11 @@ namespace ProfileDatabase.Repository
         {
             return _dbSet.FirstOrDefault(x => x.AccountId == id);
         }
+        public List<Patient> GetAll(IQueryable<Patient> query)
+        {
+            var response = query.ToList();
+
+            return response;
+        }
     }
 }

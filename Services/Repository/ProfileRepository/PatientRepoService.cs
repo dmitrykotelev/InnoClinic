@@ -13,16 +13,22 @@ namespace Middleware.Repository.ProfileRepository
         {
             _patientRepo = repo;
         }
-        public PatientDto MatchPatient(PatientDto patientDto)
+        virtual public PatientDto MatchPatient(PatientDto patientDto)
         {
             var response =  _mapper.Map<PatientDto>(_patientRepo.MatchPatient(_mapper.Map<Patient>(patientDto)).GetAwaiter().GetResult());
 
             return response;
         }
-        public PatientDto GetByAccountId(string id)
+        virtual public PatientDto GetByAccountId(string id)
         {
             var response = _mapper.Map<PatientDto>(_patientRepo.GetByAccountId(id));
             
+            return response;
+        }
+        virtual public List<PatientDto> GetAll(IQueryable<Patient> query)
+        {
+            var response = _mapper.Map<List<PatientDto>>(_patientRepo.GetAll(query));
+
             return response;
         }
     }

@@ -17,9 +17,9 @@ namespace ProfileDatabase.Models
         [MaxLength(50)]
         public string? MiddleName { get; set; }
         public DateTime DateOfBirth { get; set; }
-        public int AccountId { get; set; }
+        public string AccountId { get; set; }
         public int SpecializationId { get; set; }
-        public int OfficeId { get; set; }
+        public string OfficeId { get; set; }
         public DateTime CareerStartYear {  get; set; }
         public bool Status { get; set; }
     }

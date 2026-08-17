@@ -20,7 +20,6 @@ namespace ProfilesApi.Controllers
             _doctorRepo = repo ?? throw new ArgumentNullException(nameof(repo));
         }
 
-        
         [HttpPost("GetAll")]
         public async Task<IActionResult> GetAll([FromBody] List<FiltredObject> filters)
         {
@@ -47,6 +46,16 @@ namespace ProfilesApi.Controllers
 
                 return Ok(response);
             }
+        }
+        [HttpGet("GetByAccId/{accId}")]
+        public async Task<IActionResult> GetByAccId (string accId)
+        {
+            var response = _doctorRepo.GetByAccId(accId);
+
+            if (response == null)
+                return NotFound();
+
+            return Ok(response);
         }
     }
 }

@@ -2,7 +2,6 @@
 using Middleware.Mapper;
 using Middleware.Repository.DocumentsRepository;
 using Middleware.Uploader;
-using Middleware.Uploader.Minio;
 
 namespace DocumentsApi.Controllers
 {
@@ -13,18 +12,18 @@ namespace DocumentsApi.Controllers
         private IFileUploadService _minioService;
         private PhotosRepositoryService _photosRepo;
         private ILogger _logger;
-        public PhotosController(MinioService minioService, PhotosRepositoryService photosRepo, ILogger<PhotosController> logger)
-        {
 
-            _minioService = minioService ?? throw new ArgumentException(nameof(minioService));
-            _photosRepo = photosRepo ?? throw new ArgumentException(nameof(photosRepo));
-            _logger = logger ?? throw new ArgumentException(nameof(logger));
+        public PhotosController(IFileUploadService minioService, PhotosRepositoryService photosRepo, ILogger<PhotosController> logger)
+        {
+            _minioService = minioService ?? throw new ArgumentNullException(nameof(minioService));
+            _photosRepo = photosRepo ?? throw new ArgumentNullException(nameof(photosRepo));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         [HttpPost("UploadPhoto")]
-        public async Task<IActionResult> UploadPhoto(IFormFile file, [FromQuery] Guid AccountId)
+        public async Task<IActionResult> UploadPhoto(IFormFile file)
         {
-            using (_logger.BeginScope($"Got Photo Uploading from {AccountId}"))
+            using (_logger.BeginScope($"Got Photo Uploading"))
             {
                 PhotoDto photoDto = new PhotoDto();
                 var response = _photosRepo.Add(photoDto);

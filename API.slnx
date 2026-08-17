@@ -1,0 +1,40 @@
+<Solution>
+  <Folder Name="/AppoitmentsApi/">
+    <Project Path="AppoitmentsApi/AppoitmentsApi.csproj" Id="98c48cac-bb1d-48ed-be73-bc620267c115" />
+    <Project Path="AppoitmentsDatabase/AppoitmentsDatabase.csproj" Id="f863eca8-dd0e-42a6-9c65-092282000622" />
+  </Folder>
+  <Folder Name="/Base/">
+    <Project Path="BaseApi/BaseApi.csproj" Id="cbe4f2f8-d9a1-4d01-b21a-7ec5f155b349" />
+    <Project Path="BaseClasses/BaseModules.csproj" Id="d36978f3-789f-4549-bd7d-c754a605e4be" />
+  </Folder>
+  <Folder Name="/DocumentsApi/">
+    <Project Path="DocumentsApi/DocumentsApi.csproj" Id="6609d12f-e09a-4909-8f95-8e45af86f159" />
+    <Project Path="DocumentsDatabase/DocumentsDatabase.csproj" Id="b26b0daf-ddb0-40cd-bd90-460d739f9e0f" />
+  </Folder>
+  <Folder Name="/IdentityApi/">
+    <Project Path="IdentityServer/IdentityServer.csproj" Id="165a2a06-4895-4e93-ba97-4802c143c77b" />
+  </Folder>
+  <Folder Name="/OfficesApi/">
+    <Project Path="OfficesApi/OfficesApi.csproj" Id="e6bd53b9-67f7-4aff-848e-403a26f7cc02" />
+    <Project Path="OfficesDatabase/OfficesDatabase.csproj" Id="8b4747e3-9be0-48a8-8c95-51320d0f1c39" />
+  </Folder>
+  <Folder Name="/ProfApi/">
+    <Project Path="Database/ProfileDatabase.csproj" />
+    <Project Path="ProfilesApi/ProfilesApi.csproj" />
+  </Folder>
+  <Folder Name="/ServApi/">
+    <Project Path="ServicesApi/ServicesApi.csproj" Id="cc314152-1271-427c-a4c3-6788257fdb10" />
+    <Project Path="ServicesDatabase/ServicesDatabase.csproj" Id="6566477e-a996-4e47-a7ab-203583d964c7" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="../AppoitmentsTests/AppoitmentsTests.csproj" Id="cdd5ad4e-d56a-488a-adbe-70b0ebd4db99" />
+    <Project Path="../IdentityServerTests/IdentityServerTests.csproj" Id="b8c5dbf7-6628-4850-b3d6-93999359441a" />
+    <Project Path="../ProfilesTests/ProfilesTests.csproj" Id="f1392390-2a5e-48f9-a2f9-32f242507808" />
+    <Project Path="../ServicesTests/ServicesTests.csproj" Id="a9edab2a-548b-49cd-909e-9cc2419879ad" />
+  </Folder>
+  <Project Path="ApiGateway/ApiGateway.csproj" Id="12b4ac78-2b99-4481-981a-8d72ab960548" />
+  <Project Path="docker-compose.dcproj">
+    <Build />
+  </Project>
+  <Project Path="Services/Middleware.csproj" />
+</Solution>
